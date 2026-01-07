@@ -42,7 +42,7 @@ module.exports = {
             });
 
             // Wait for connection to be ready
-            await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
+            await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
 
             await interaction.editReply({
                 content: `✅ Berhasil join ke **${voiceChannel.name}**!`

@@ -162,7 +162,7 @@ async function handleRoasting(message, apiKey) {
     Berikan komentar roasting yang lucu, pedas tapi bercanda, atau pujian yang unik dalam Bahasa Indonesia gaul/santai.
     Komentarnya harus sangat spesifik dengan visual yang ada di gambar.
     Jangan terlalu panjang, cukup 3 sampai 9 kata yang ngena.
-    Gunakan gaya bahasa seperti anak muda Indonesia (ngab, bjir, wkwk, dll).
+    Gunakan gaya bahasa seperti anak muda Indonesia (wok, bjir, wkwk, dll).
     Jika gambarnya default discord (polos), katakan sesuatu tentang betapa membosankannya usernya.`;
 
     const imagePart = {

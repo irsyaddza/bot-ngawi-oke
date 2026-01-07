@@ -20,7 +20,7 @@ module.exports = {
 
         await interaction.reply({
             content: '✅ Bot telah keluar dari voice channel.',
-            ephemeral: false
+            ephemeral: true
         });
     }
 };

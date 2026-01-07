@@ -3,7 +3,7 @@ const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerS
 const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
 const path = require('path');
 const fs = require('fs');
-const { getVoice } = require('../utils/voiceSettings');
+const { getVoice, getVoiceInfo } = require('../utils/voiceSettings');
 
 // Ensure temp directory exists
 const tempDir = path.join(__dirname, '../../temp');
@@ -11,16 +11,57 @@ if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
 }
 
-// Function to generate TTS using Edge TTS with configurable voice
-async function generateTTS(text, voiceId) {
-    const tts = new MsEdgeTTS();
-    await tts.setMetadata(voiceId, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+// Function to generate TTS using configurable provider
+async function generateTTS(text, voice) {
+    const provider = voice.provider || 'msedge'; // Default to msedge
 
-    // toFile returns { audioFilePath, metadataFilePath }
-    const result = await tts.toFile(tempDir, text);
-    tts.close();
+    if (provider === 'elevenlabs') {
+        const apiKey = process.env.ELEVENLABS_API_KEY;
+        if (!apiKey) throw new Error('ElevenLabs API Key is missing!');
 
-    return result.audioFilePath;
+        const voiceId = voice.id;
+        const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'xi-api-key': apiKey
+            },
+            body: JSON.stringify({
+                text: text,
+                model_id: 'eleven_multilingual_v2',
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.75
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(`ElevenLabs Error: ${JSON.stringify(error)}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Save to temp file
+        const fileName = `tts-${Date.now()}.mp3`;
+        const filePath = path.join(tempDir, fileName);
+        fs.writeFileSync(filePath, buffer);
+
+        return filePath;
+
+    } else {
+        // Fallback or Default: MS Edge TTS
+        const tts = new MsEdgeTTS();
+        await tts.setMetadata(voice.id, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+
+        // toFile returns { audioFilePath, metadataFilePath }
+        const result = await tts.toFile(tempDir, text);
+        return result.audioFilePath;
+    }
 }
 
 module.exports = {
@@ -49,8 +90,8 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         try {
-            const voiceId = getVoice(interaction.guild.id);
-            const filePath = await generateTTS(message, voiceId);
+            const voice = getVoiceInfo(interaction.guild.id);
+            const filePath = await generateTTS(message, voice);
 
             // Create audio player and resource
             const player = createAudioPlayer();

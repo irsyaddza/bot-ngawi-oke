@@ -16,13 +16,36 @@ const VOICES = {
         id: 'id-ID-ArdiNeural',
         name: 'Ardi',
         emoji: '👨',
-        description: 'Pria'
+        description: 'Pria (Edge)',
+        provider: 'msedge'
     },
     'gadis': {
         id: 'id-ID-GadisNeural',
         name: 'Gadis',
         emoji: '👩',
-        description: 'Wanita'
+        description: 'Wanita (Edge)',
+        provider: 'msedge'
+    },
+    'putri': {
+        id: 'I7sakys8pBZ1Z5f0UhT9',
+        name: 'Putri',
+        emoji: '💃',
+        description: 'Putri (ElevenLabs)',
+        provider: 'elevenlabs'
+    },
+    'alice': {
+        id: 'Xb7hH8MSUJpSbSDYk0k2',
+        name: 'Alice',
+        emoji: '👩🏼',
+        description: 'Alice (ElevenLabs)',
+        provider: 'elevenlabs'
+    },
+    'putra': {
+        id: 'RWiGLY9uXI70QL540WNd',
+        name: 'Putra',
+        emoji: '🤵',
+        description: 'Putra (ElevenLabs)',
+        provider: 'elevenlabs'
     }
 };
 

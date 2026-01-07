@@ -76,14 +76,32 @@ function saveSettings(settings) {
 // Get voice for a guild
 function getVoice(guildId) {
     const settings = loadSettings();
-    const voiceKey = settings[guildId] || DEFAULT_VOICE;
+    let voiceKey = DEFAULT_VOICE;
+
+    if (settings[guildId]) {
+        if (typeof settings[guildId] === 'string') {
+            voiceKey = settings[guildId];
+        } else {
+            voiceKey = settings[guildId].voice || DEFAULT_VOICE;
+        }
+    }
+
     return VOICES[voiceKey]?.id || VOICES[DEFAULT_VOICE].id;
 }
 
 // Get voice info for a guild
 function getVoiceInfo(guildId) {
     const settings = loadSettings();
-    const voiceKey = settings[guildId] || DEFAULT_VOICE;
+    let voiceKey = DEFAULT_VOICE;
+
+    if (settings[guildId]) {
+        if (typeof settings[guildId] === 'string') {
+            voiceKey = settings[guildId];
+        } else {
+            voiceKey = settings[guildId].voice || DEFAULT_VOICE;
+        }
+    }
+
     return VOICES[voiceKey] || VOICES[DEFAULT_VOICE];
 }
 
@@ -93,7 +111,39 @@ function setVoice(guildId, voiceKey) {
         return false;
     }
     const settings = loadSettings();
-    settings[guildId] = voiceKey;
+    if (!settings[guildId]) settings[guildId] = {};
+
+    // Check if settings[guildId] is string (old format) or object
+    if (typeof settings[guildId] === 'string') {
+        settings[guildId] = { voice: settings[guildId] };
+    }
+
+    settings[guildId].voice = voiceKey;
+    saveSettings(settings);
+    return true;
+}
+
+// Get bot welcome status
+function getBotWelcome(guildId) {
+    const settings = loadSettings();
+    const guildSettings = settings[guildId];
+    if (typeof guildSettings === 'string') {
+        return false; // Old format didn't have this setting
+    }
+    return guildSettings?.botWelcome || false;
+}
+
+// Set bot welcome status
+function setBotWelcome(guildId, status) {
+    const settings = loadSettings();
+    if (!settings[guildId]) settings[guildId] = {};
+
+    // Migration for old format
+    if (typeof settings[guildId] === 'string') {
+        settings[guildId] = { voice: settings[guildId] };
+    }
+
+    settings[guildId].botWelcome = status;
     saveSettings(settings);
     return true;
 }
@@ -103,5 +153,7 @@ module.exports = {
     DEFAULT_VOICE,
     getVoice,
     getVoiceInfo,
-    setVoice
+    setVoice,
+    getBotWelcome,
+    setBotWelcome
 };

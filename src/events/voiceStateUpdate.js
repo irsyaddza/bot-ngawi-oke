@@ -1,44 +1,37 @@
 const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
-const path = require('path');
 const fs = require('fs');
+const { generateTTS } = require('../utils/ttsHandler');
+const { getBotWelcome, getVoiceInfo, VOICES } = require('../utils/voiceSettings');
 
-// Ensure temp directory exists
-const tempDir = path.join(__dirname, '../temp');
-if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-}
-
-// Function to generate TTS using Edge TTS (male Indonesian voice)
-async function generateTTS(text) {
-    const tts = new MsEdgeTTS();
-    // Use Indonesian male voice - Ardi (adult male)
-    await tts.setMetadata('id-ID-ArdiNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-
-    // toFile returns { audioFilePath, metadataFilePath }
-    const result = await tts.toFile(tempDir, text);
-    tts.close();
-
-    return result.audioFilePath;
-}
+// TTS generation logic moved to shared handler
 
 // Function to play TTS in voice channel
-async function playWelcomeTTS(guildId, memberName) {
+async function playWelcomeTTS(guildId, memberName, isBot = false) {
     const connection = getVoiceConnection(guildId);
 
     if (!connection) return;
 
     try {
-        const welcomeMessages = [
-            `Halo ${memberName}, selamat datang!`,
-            `Wah, ${memberName} sudah datang!`,
-            `Hai ${memberName}!`,
-            `Selamat datang ${memberName}!`,
-            `Akhirnya ${memberName} join juga!`
-        ];
+        let message;
+        let voice;
 
-        const message = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-        const filePath = await generateTTS(message);
+        if (isBot) {
+            message = "Rusdi from ngawi is here!";
+            voice = VOICES.putra; // Use Putra for bot welcome
+        } else {
+            const welcomeMessages = [
+                `Halo ${memberName}, selamat datang!`,
+                `Wah, ${memberName} sudah datang!`,
+                `Hai ${memberName}!`,
+                `Selamat datang ${memberName}!`,
+                `Akhirnya ${memberName} join juga!`
+            ];
+            message = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+            // Use current guild voice for user welcome
+            voice = getVoiceInfo(guildId);
+        }
+
+        const filePath = await generateTTS(message, voice);
 
         const player = createAudioPlayer();
         const resource = createAudioResource(filePath);
@@ -63,9 +56,6 @@ async function playWelcomeTTS(guildId, memberName) {
 module.exports = {
     name: 'voiceStateUpdate',
     async execute(oldState, newState) {
-        // Ignore bot users
-        if (newState.member.user.bot) return;
-
         // Check if user joined a voice channel (wasn't in one before, now is)
         const joinedChannel = !oldState.channelId && newState.channelId;
 
@@ -75,15 +65,31 @@ module.exports = {
         if (joinedChannel || movedChannel) {
             // Get the bot's voice connection in this guild
             const connection = getVoiceConnection(newState.guild.id);
+            const client = newState.client;
 
             // Only greet if bot is in the same channel
             if (connection && connection.joinConfig.channelId === newState.channelId) {
+
+                // Logic for Bot Join Welcome
+                if (newState.member.id === client.user.id) {
+                    const isBotWelcomeEnabled = getBotWelcome(newState.guild.id);
+                    if (isBotWelcomeEnabled) {
+                        setTimeout(() => {
+                            playWelcomeTTS(newState.guild.id, 'Bot', true);
+                        }, 1000);
+                    }
+                    return;
+                }
+
+                // Logic for User Join Welcome (Ignore bots)
+                if (newState.member.user.bot) return;
+
                 // Get display name
                 const memberName = newState.member.displayName || newState.member.user.username;
 
                 // Small delay to let them fully connect
                 setTimeout(() => {
-                    playWelcomeTTS(newState.guild.id, memberName);
+                    playWelcomeTTS(newState.guild.id, memberName, false);
                 }, 1000);
             }
         }

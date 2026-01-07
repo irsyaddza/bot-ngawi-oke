@@ -3,6 +3,7 @@ const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerS
 const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
 const path = require('path');
 const fs = require('fs');
+const { getVoice } = require('../utils/voiceSettings');
 
 // Ensure temp directory exists
 const tempDir = path.join(__dirname, '../../temp');
@@ -10,11 +11,10 @@ if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
 }
 
-// Function to generate TTS using Edge TTS (male Indonesian voice)
-async function generateTTS(text) {
+// Function to generate TTS using Edge TTS with configurable voice
+async function generateTTS(text, voiceId) {
     const tts = new MsEdgeTTS();
-    // Use Indonesian male voice - Ardi (adult male)
-    await tts.setMetadata('id-ID-ArdiNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    await tts.setMetadata(voiceId, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
 
     // toFile returns { audioFilePath, metadataFilePath }
     const result = await tts.toFile(tempDir, text);
@@ -49,7 +49,8 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         try {
-            const filePath = await generateTTS(message);
+            const voiceId = getVoice(interaction.guild.id);
+            const filePath = await generateTTS(message, voiceId);
 
             // Create audio player and resource
             const player = createAudioPlayer();

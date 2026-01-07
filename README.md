@@ -12,7 +12,10 @@
 ## ✨ Fitur Unggulan
 
 🤖 **Voice TTS (Text-to-Speech)**  
-Bot dapat berbicara di voice channel menggunakan command `/say`. Suara yang dihasilkan adalah suara **Pria Indonesia (Ardi)** yang natural!
+Bot dapat berbicara di voice channel menggunakan command `/say`. Pilih suara **Ardi (Pria)** atau **Gadis (Wanita)**!
+
+🎙️ **Voice Customization**  
+Ganti suara TTS bot dengan command `/changevoice`. Tersedia dropdown untuk memilih suara yang diinginkan.
 
 👋 **Auto Voice Welcomer**  
 Secara otomatis menyapa teman yang baru join ke voice channel. Gak bakal kesepian lagi!
@@ -20,16 +23,40 @@ Secara otomatis menyapa teman yang baru join ke voice channel. Gak bakal kesepia
 📸 **Profile Manager**  
 Ganti foto profil bot dengan mudah via command.
 
+👮 **Role Management**  
+Berikan atau cabut role member dengan mudah menggunakan command moderation.
+
+📢 **Message Tools**  
+Kirim pesan atau reply ke channel tertentu melalui bot.
+
 ---
 
 ## 🛠️ Commands List
 
-| Command | Icon | Deskripsi |
-| :--- | :---: | :--- |
-| **/join** | 🔌 | Masukkan bot ke voice channel (bisa pilih channel). |
-| **/leave** | ❌ | Keluarkan bot dari voice channel. |
-| **/say** `[pesan]` | 🗣️ | Bot akan mengucapkan pesan kamu. |
-| **/changepfp** | 🖼️ | Ganti foto profil bot (Admin Only). |
+### 🔊 Voice Commands
+| Command | Deskripsi |
+| :--- | :--- |
+| **/join** | Masukkan bot ke voice channel (bisa pilih channel). |
+| **/leave** | Keluarkan bot dari voice channel. |
+| **/say** `[pesan]` | Bot akan mengucapkan pesan kamu di voice channel. |
+| **/changevoice** | Ganti suara TTS bot (Ardi/Gadis). |
+
+### 👮 Moderation Commands
+| Command | Deskripsi |
+| :--- | :--- |
+| **/giverole** `[user]` `[role]` | Berikan role kepada member. |
+| **/takerole** `[user]` `[role]` | Cabut role dari member. |
+
+### � Message Commands
+| Command | Deskripsi |
+| :--- | :--- |
+| **/send** `[channel]` `[pesan]` | Kirim pesan ke channel tertentu. |
+| **/reply** `[message_id]` `[pesan]` | Reply ke pesan tertentu. |
+
+### ⚙️ Utility Commands
+| Command | Deskripsi |
+| :--- | :--- |
+| **/changepfp** | Ganti foto profil bot (Admin Only). |
 
 ---
 
@@ -42,8 +69,8 @@ Pastikan kamu sudah menginstall:
 
 ### 2. Clone Repository
 ```bash
-git clone https://github.com/username/project_bot.git
-cd project_bot
+git clone https://github.com/username/bot-ngawi-oke.git
+cd bot-ngawi-oke
 ```
 
 ### 3. Install Dependencies
@@ -76,7 +103,7 @@ npm start
 
 - **Discord.js v14** - Library utama
 - **@discordjs/voice** - Voice connection
-- **msedge-tts** - Text-to-Speech engine (Microsoft Edge - Ardi Neural)
+- **msedge-tts** - Text-to-Speech engine (Ardi & Gadis Neural)
 - **ffmpeg-static** - Audio processing
 
 ---
@@ -88,5 +115,6 @@ Mau nambah fitur? Silakan **Fork** repository ini dan buat **Pull Request**!
 ---
 
 <div align="center">
-  Dibuat dengan ❤️ oleh <b>Irsyad</b>
+  From <b>Antigravity 2026</b>
 </div>
+

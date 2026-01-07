@@ -1,7 +1,7 @@
 {
     "name": "discord-management-bot",
     "version": "1.0.0",
-    "description": "A simple Discord bot for welcome/goodbye messages and auto-role.",
+    "description": "A simple Discord bot from Java.",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",

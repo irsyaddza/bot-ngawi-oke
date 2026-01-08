@@ -17,7 +17,7 @@ module.exports = {
     async execute(interaction) {
         const provider = interaction.options.getString('provider');
 
-        await interaction.deferReply({ ephemeral: false });
+        await interaction.deferReply({ ephemeral: true });
 
         try {
             if (provider === 'gemini') {

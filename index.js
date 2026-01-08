@@ -69,8 +69,8 @@ client.once('ready', () => {
 
 
         // 3. Static/Fun Statuses
-        activities.push({ name: 'Satru - Denny Caknan', type: ActivityType.Listening });
-        activities.push({ name: 'Kokang mas Amba', type: ActivityType.Playing });
+        activities.push({ name: 'No Surprises - Radiohead', type: ActivityType.Listening });
+        activities.push({ name: 'Your Dih', type: ActivityType.Playing });
 
         // Rotate
         const activity = activities[i % activities.length];

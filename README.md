@@ -63,6 +63,20 @@ Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau 
 | :--- | :--- |
 | **/changepfp** `[url]` | Ganti foto profil bot (Admin Only). |
 
+### 🤖 AI Chat Commands (Mention Bot)
+Mention bot untuk menggunakan perintah atau chat dengan AI (Rusdi from Ngawi).
+
+| Mention Command | Deskripsi |
+| :--- | :--- |
+| **@Bot** `[pesan]` | Chat dengan AI (Rusdi from Ngawi). |
+| **@Bot** `info server` | Tampilkan informasi server. |
+| **@Bot** `berapa member` | Tampilkan jumlah anggota server. |
+| **@Bot** `mute @user [durasi]` | Mute member (default 5 menit). |
+| **@Bot** `unmute @user` | Unmute member. |
+| **@Bot** `kick @user` | Kick member dari server. |
+| **@Bot** `ban @user` | Ban member dari server. |
+| **@Bot** `hapus X pesan` | Hapus X pesan terakhir di channel. |
+
 ---
 
 ## 🚀 Cara Install & Jalankan

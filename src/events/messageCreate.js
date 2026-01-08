@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { parseAdminCommand, executeAdminCommand } = require('../utils/adminCommands');
 
 // --- MEMORY STORAGE ---
 // Key: userId-channelId, Value: Array of { role: "user" | "model", parts: [{ text: string }] }
@@ -67,6 +68,13 @@ module.exports = {
 
         if (!cleanedContent) return; // Ignore if only mention
 
+        // === ADMIN COMMAND CHECK (Priority) ===
+        const adminCommand = parseAdminCommand(cleanedContent, message);
+        if (adminCommand) {
+            return await executeAdminCommand(adminCommand, message);
+        }
+
+        // === AI CHAT MODE ===
         // Check API Key
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -86,6 +94,7 @@ module.exports = {
                 // --- CHAT AI MODE ---
                 await handleChat(message, apiKey, cleanedContent);
             }
+
 
         } catch (error) {
             console.error('Gemini Error:', error);

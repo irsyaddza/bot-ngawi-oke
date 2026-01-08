@@ -31,7 +31,7 @@ Ganti foto profil bot dengan mudah via command `/changepfp`.
 Kelola member dengan command `/giverole` dan `/takerole`.
 
 📢 **Message Tools**  
-Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau `/reply`.
+Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau use apps untuk reply.
 
 ---
 
@@ -56,8 +56,7 @@ Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau 
 ### ✉️ Message Commands
 | Command | Deskripsi |
 | :--- | :--- |
-| **/send** `[channel]` `[pesan]` | Kirim pesan ke channel tertentu. Mendukung mention & channel. |
-| **/reply** `[message_id]` `[pesan]` | Balas pesan tertentu menggunakan bot. |
+| **/send** `[channel]` `[pesan]` | Kirim pesan ke channel tertentu. Mendukung mention & channel.
 
 ### ⚙️ Utility Commands
 | Command | Deskripsi |

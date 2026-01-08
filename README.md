@@ -45,6 +45,7 @@ Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau 
 | **/say** `[pesan]` | Bot akan mengucapkan pesan kamu di voice channel. |
 | **/changevoice** | Ganti suara TTS bot (Edge/ElevenLabs). |
 | **/voicewelcome** `[status]` | Aktifkan/matikan sapaan otomatis bot saat join voice channel. |
+| **/voicechat** `[status]` | Aktifkan/matikan voice chat AI. Panggil "Halo Rusdi" untuk ngobrol! |
 
 ### 👮 Moderation Commands
 | Command | Deskripsi |
@@ -62,6 +63,7 @@ Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau 
 | Command | Deskripsi |
 | :--- | :--- |
 | **/changepfp** `[url]` | Ganti foto profil bot (Admin Only). |
+| **/dashboard** `[provider]` | Lihat info & usage API (Gemini/ElevenLabs). |
 
 ### 🤖 AI Chat Commands (Mention Bot)
 Mention bot untuk menggunakan perintah atau chat dengan AI (Rusdi from Ngawi).

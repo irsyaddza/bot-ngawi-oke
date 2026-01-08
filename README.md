@@ -11,23 +11,27 @@
 
 ## ✨ Fitur Unggulan
 
-🤖 **Voice TTS (Text-to-Speech)**  
-Bot dapat berbicara di voice channel menggunakan command `/say`. Pilih suara **Ardi (Pria)** atau **Gadis (Wanita)**!
+🤖 **Multi-Engine TTS (Text-to-Speech)**  
+Bot dapat berbicara di voice channel menggunakan command `/say`. Mendukung berbagai suara berkualitas tinggi:
+- **Edge TTS**: Ardi (Pria) & Gadis (Wanita).
+- **ElevenLabs**: Brian, Putri, Serafina (English), Putra, Aki (Japanese), Annie (Korean).
 
 🎙️ **Voice Customization**  
-Ganti suara TTS bot dengan command `/changevoice`. Tersedia dropdown untuk memilih suara yang diinginkan.
+Ganti suara TTS bot kapan saja dengan command `/changevoice`. Tersedia berbagai pilihan bahasa dan karakter.
 
 👋 **Auto Voice Welcomer**  
-Secara otomatis menyapa teman yang baru join ke voice channel. Gak bakal kesepian lagi!
+Secara otomatis menyapa teman yang baru join ke voice channel.
+- **Member Welcome**: Menyapa member yang join.
+- **Bot Welcome**: Bot bisa memperkenalkan diri saat join (Command: `/voicewelcome`).
 
 📸 **Profile Manager**  
-Ganti foto profil bot dengan mudah via command.
+Ganti foto profil bot dengan mudah via command `/changepfp`.
 
-👮 **Role Management**  
-Berikan atau cabut role member dengan mudah menggunakan command moderation.
+👮 **Moderation Tools**  
+Kelola member dengan command `/giverole` dan `/takerole`.
 
 📢 **Message Tools**  
-Kirim pesan atau reply ke channel tertentu melalui bot.
+Kirim pesan atau reply ke channel tertentu melalui bot menggunakan `/send` atau `/reply`.
 
 ---
 
@@ -39,7 +43,8 @@ Kirim pesan atau reply ke channel tertentu melalui bot.
 | **/join** | Masukkan bot ke voice channel (bisa pilih channel). |
 | **/leave** | Keluarkan bot dari voice channel. |
 | **/say** `[pesan]` | Bot akan mengucapkan pesan kamu di voice channel. |
-| **/changevoice** | Ganti suara TTS bot (Ardi/Gadis). |
+| **/changevoice** | Ganti suara TTS bot (Edge/ElevenLabs). |
+| **/voicewelcome** `[status]` | Aktifkan/matikan sapaan otomatis bot saat join voice channel. |
 
 ### 👮 Moderation Commands
 | Command | Deskripsi |
@@ -47,16 +52,16 @@ Kirim pesan atau reply ke channel tertentu melalui bot.
 | **/giverole** `[user]` `[role]` | Berikan role kepada member. |
 | **/takerole** `[user]` `[role]` | Cabut role dari member. |
 
-### � Message Commands
+### ✉️ Message Commands
 | Command | Deskripsi |
 | :--- | :--- |
-| **/send** `[channel]` `[pesan]` | Kirim pesan ke channel tertentu. |
-| **/reply** `[message_id]` `[pesan]` | Reply ke pesan tertentu. |
+| **/send** `[channel]` `[pesan]` | Kirim pesan ke channel tertentu. Mendukung mention & channel. |
+| **/reply** `[message_id]` `[pesan]` | Balas pesan tertentu menggunakan bot. |
 
 ### ⚙️ Utility Commands
 | Command | Deskripsi |
 | :--- | :--- |
-| **/changepfp** | Ganti foto profil bot (Admin Only). |
+| **/changepfp** `[url]` | Ganti foto profil bot (Admin Only). |
 
 ---
 
@@ -79,11 +84,12 @@ npm install
 ```
 
 ### 4. Konfigurasi
-Buat file `.env` dan isi dengan token bot kamu:
+Buat file `.env` dan isi dengan konfigurasi kamu:
 ```env
 DISCORD_TOKEN=token_bot_kamu_disini
 CLIENT_ID=client_id_kamu_disini
 GUILD_ID=server_id_kamu_disini
+ELEVENLABS_API_KEY=api_key_kamu_disini
 ```
 
 ### 5. Deploy Commands
@@ -104,7 +110,9 @@ npm start
 - **Discord.js v14** - Library utama
 - **@discordjs/voice** - Voice connection
 - **msedge-tts** - Text-to-Speech engine (Ardi & Gadis Neural)
+- **ElevenLabs API** - Premium Text-to-Speech engine
 - **ffmpeg-static** - Audio processing
+- **@google/generative-ai** - Integrasi AI (Opsional)
 
 ---
 

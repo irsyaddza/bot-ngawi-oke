@@ -162,6 +162,31 @@ function setBotWelcome(guildId, status) {
     return true;
 }
 
+// Get voice chat enabled status
+function getVoiceChatEnabled(guildId) {
+    const settings = loadSettings();
+    const guildSettings = settings[guildId];
+    if (typeof guildSettings === 'string') {
+        return false;
+    }
+    return guildSettings?.voiceChatEnabled || false;
+}
+
+// Set voice chat enabled status
+function setVoiceChatEnabled(guildId, status) {
+    const settings = loadSettings();
+    if (!settings[guildId]) settings[guildId] = {};
+
+    // Migration for old format
+    if (typeof settings[guildId] === 'string') {
+        settings[guildId] = { voice: settings[guildId] };
+    }
+
+    settings[guildId].voiceChatEnabled = status;
+    saveSettings(settings);
+    return true;
+}
+
 module.exports = {
     VOICES,
     DEFAULT_VOICE,
@@ -169,5 +194,7 @@ module.exports = {
     getVoiceInfo,
     setVoice,
     getBotWelcome,
-    setBotWelcome
+    setBotWelcome,
+    getVoiceChatEnabled,
+    setVoiceChatEnabled
 };

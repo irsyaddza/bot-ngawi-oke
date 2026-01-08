@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -44,6 +44,39 @@ if (fs.existsSync(commandsPath)) {
             client.commands.set(command.data.name, command);
         }
     }
+
 }
+
+client.once('ready', () => {
+    console.log(`Ready! Logged in as ${client.user.tag}`);
+
+    let i = 0;
+    setInterval(() => {
+        // Dynamic Status Logic
+        const activities = [];
+
+        // 1. Voice Channel Status
+        // Find if bot is in any voice channel
+        let voiceStatus = 'Not in Voice 🔇';
+        client.guilds.cache.forEach(guild => {
+            const me = guild.members.me;
+            if (me && me.voice.channel) {
+                voiceStatus = `🎙️ ${me.voice.channel.name}`;
+            }
+        });
+        activities.push({ name: voiceStatus, type: ActivityType.Listening });
+
+
+
+        // 3. Static/Fun Statuses
+        activities.push({ name: 'Satru - Denny Caknan', type: ActivityType.Listening });
+        activities.push({ name: 'Kokang mas Amba', type: ActivityType.Playing });
+
+        // Rotate
+        const activity = activities[i % activities.length];
+        client.user.setActivity(activity.name, { type: activity.type });
+        i++;
+    }, 5000);
+});
 
 client.login(process.env.DISCORD_TOKEN);

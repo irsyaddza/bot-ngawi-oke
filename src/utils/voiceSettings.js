@@ -19,12 +19,12 @@ const VOICES = {
         description: 'Pria (Edge)',
         provider: 'msedge'
     },
-    'gadis': {
-        id: 'id-ID-GadisNeural',
-        name: 'Gadis',
-        emoji: '👩',
-        description: 'Wanita (Edge)',
-        provider: 'msedge'
+    'brian': {
+        id: 'pNInz6obpgDQGcFmaJgB',
+        name: 'Brian',
+        emoji: '👨',
+        description: 'Brian (ElevenLabs)',
+        provider: 'elevenlabs'
     },
     'putri': {
         id: 'I7sakys8pBZ1Z5f0UhT9',
@@ -34,10 +34,10 @@ const VOICES = {
         provider: 'elevenlabs'
     },
     'alice': {
-        id: 'Xb7hH8MSUJpSbSDYk0k2',
-        name: 'Alice',
+        id: '4tRn1lSkEn13EVTuqb0g',
+        name: 'Serafina',
         emoji: '👩🏼',
-        description: 'Alice (ElevenLabs)',
+        description: 'Serafina (English - ElevenLabs)',
         provider: 'elevenlabs'
     },
     'putra': {
@@ -45,6 +45,20 @@ const VOICES = {
         name: 'Putra',
         emoji: '🤵',
         description: 'Putra (ElevenLabs)',
+        provider: 'elevenlabs'
+    },
+    'alice_jp': {
+        id: 'ngvNHfiCrXLPAHcTrZK1',
+        name: 'Aki',
+        emoji: '🇯🇵',
+        description: 'Aki (Japanese - ElevenLabs)',
+        provider: 'elevenlabs'
+    },
+    'annie_kr': {
+        id: 'Lb7qkOn5hF8p7qfCDH8q',
+        name: 'Annie',
+        emoji: '🇰🇷',
+        description: 'Annie (Korean - ElevenLabs)',
         provider: 'elevenlabs'
     }
 };

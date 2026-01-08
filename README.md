@@ -90,6 +90,7 @@ DISCORD_TOKEN=token_bot_kamu_disini
 CLIENT_ID=client_id_kamu_disini
 GUILD_ID=server_id_kamu_disini
 ELEVENLABS_API_KEY=api_key_kamu_disini
+GEMINI_API_KEY=api_key_kamu_disini
 ```
 
 ### 5. Deploy Commands
@@ -111,7 +112,6 @@ npm start
 - **@discordjs/voice** - Voice connection
 - **msedge-tts** - Text-to-Speech engine (Ardi & Gadis Neural)
 - **ElevenLabs API** - Premium Text-to-Speech engine
-- **ffmpeg-static** - Audio processing
 - **@google/generative-ai** - Integrasi AI (Opsional)
 
 ---

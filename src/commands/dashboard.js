@@ -43,38 +43,60 @@ async function showGeminiDashboard(interaction) {
         });
     }
 
-    // Test API availability by making a simple request
+    // Test API availability by testing multiple models (same as chat fallback)
     let isAvailable = false;
     let availabilityStatus = '❌ Unavailable';
     let errorReason = '';
+    let workingModel = '';
 
-    try {
-        const { GoogleGenerativeAI } = require('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const modelsToTest = [
+        'gemini-flash-latest',
+        'gemini-2.0-flash',
+        'gemini-2.5-flash'
+    ];
 
-        // Simple test request
-        const result = await model.generateContent('Hi');
-        const response = await result.response;
+    for (const modelName of modelsToTest) {
+        try {
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
 
-        if (response.text()) {
-            isAvailable = true;
-            availabilityStatus = '✅ Available';
+            // Simple test request
+            const result = await model.generateContent('Hi');
+            const response = await result.response;
+
+            if (response.text()) {
+                isAvailable = true;
+                availabilityStatus = '✅ Available';
+                workingModel = modelName;
+                break; // Found a working model, stop testing
+            }
+        } catch (error) {
+            // Continue to next model if this one fails
+            if (error.message.includes('429')) {
+                errorReason = 'Rate limited on ' + modelName;
+            } else if (error.message.includes('403')) {
+                errorReason = 'API key tidak valid atau diblokir.';
+                break; // No point testing other models
+            } else if (error.message.includes('503')) {
+                errorReason = 'Server ' + modelName + ' sedang sibuk.';
+            } else if (error.message.includes('404')) {
+                errorReason = modelName + ' tidak ditemukan.';
+            } else {
+                errorReason = error.message.substring(0, 50);
+            }
+            continue;
         }
-    } catch (error) {
-        isAvailable = false;
-        if (error.message.includes('429')) {
-            availabilityStatus = '⚠️ Rate Limited';
-            errorReason = 'Kuota habis, update setiap jam 15.00 PM.';
-        } else if (error.message.includes('403')) {
+    }
+
+    // Set final status if all models failed
+    if (!isAvailable) {
+        if (errorReason.includes('Rate limited')) {
+            availabilityStatus = '⚠️ Rate Limited (semua model)';
+        } else if (errorReason.includes('403')) {
             availabilityStatus = '🚫 Forbidden';
-            errorReason = 'API key tidak valid atau diblokir.';
-        } else if (error.message.includes('503')) {
-            availabilityStatus = '🔧 Overloaded';
-            errorReason = 'Server sedang sibuk.';
         } else {
             availabilityStatus = '❌ Error';
-            errorReason = error.message.substring(0, 50);
         }
     }
 
@@ -85,10 +107,10 @@ async function showGeminiDashboard(interaction) {
         .addFields(
             { name: '🟢 AI Available?', value: availabilityStatus, inline: true },
             { name: '📊 API Key', value: '✅ Configured', inline: true },
-            { name: '\u200B', value: '\u200B', inline: true },
-            { name: '🔧 Models', value: '`gemini-2.0-flash`\n`gemini-flash-latest`\n`gemini-2.5-flash`', inline: true },
+            { name: '🎯 Active Model', value: workingModel ? `\`${workingModel}\`` : '_None_', inline: true },
+            { name: '🔧 Models Tested', value: '`gemini-flash-latest`\n`gemini-2.0-flash`\n`gemini-2.5-flash`', inline: true },
             { name: '💰 Tier', value: 'Free', inline: true },
-            { name: '📈 Rate Limits', value: '15 RPM\n1M TPM\n1500 RPD', inline: true },
+            { name: '📈 Rate Limits', value: '5 RPM\n250K TPM\n20 RPD', inline: true },
             {
                 name: '📝 Notes', value:
                     '• RPM = Requests Per Minute\n' +
@@ -96,7 +118,7 @@ async function showGeminiDashboard(interaction) {
                     '• RPD = Requests Per Day'
             }
         )
-        .setFooter({ text: 'Powered by Google AI' })
+        .setFooter({ text: 'Powered by Google AI | Tested all models' })
         .setTimestamp();
 
     // Add error reason if not available

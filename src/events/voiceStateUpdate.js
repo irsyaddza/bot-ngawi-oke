@@ -3,6 +3,8 @@ const fs = require('fs');
 const { generateTTS } = require('../utils/ttsHandler');
 const { getBotWelcome, getVoiceInfo, VOICES } = require('../utils/voiceSettings');
 const { isAllowed, getLockInfo } = require('../utils/voiceLock');
+const { EmbedBuilder, AuditLogEvent } = require('discord.js');
+const { sendAuditLog } = require('../utils/auditLogUtils');
 
 // TTS generation logic moved to shared handler
 
@@ -45,10 +47,117 @@ async function handleVoiceLock(oldState, newState) {
     }
 }
 
+// Audit Log Handler for Voice
+async function handleVoiceAudit(oldState, newState) {
+    if (!oldState.guild) return;
+
+    const member = newState.member || oldState.member;
+    const guild = oldState.guild;
+
+    let eventType = '';
+    let description = '';
+    let color = '#FFAA00'; // Default Orange
+    let fields = [];
+
+    // 1. Join
+    if (!oldState.channelId && newState.channelId) {
+        eventType = '🎤 Member Joined Voice';
+        color = '#00FF00'; // Green
+        description = `Joined **<#${newState.channelId}>**`;
+    }
+    // 2. Leave
+    else if (oldState.channelId && !newState.channelId) {
+        eventType = '🎤 Member Left Voice';
+        color = '#FF0000'; // Red
+        description = `Left **<#${oldState.channelId}>**`;
+
+        // Check for Kick
+        try {
+            const fetchedLogs = await guild.fetchAuditLogs({
+                limit: 1,
+                type: AuditLogEvent.MemberDisconnect,
+            });
+            const kickLog = fetchedLogs.entries.first();
+
+            if (kickLog && kickLog.target.id === member.id && kickLog.createdTimestamp > (Date.now() - 5000)) {
+                eventType = '👢 Member Disconnected (Kick)';
+                color = '#FF4500'; // Red-Orange
+                fields.push({ name: '👮 Kicked by', value: `${kickLog.executor.tag}`, inline: true });
+            }
+        } catch (e) {
+            console.error('Failed to fetch audit logs for voice kick:', e);
+        }
+    }
+    // 3. Move
+    else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+        eventType = '🎤 Member Moved Voice';
+        color = '#00AAFF'; // Blue
+        description = `Moved from **<#${oldState.channelId}>** to **<#${newState.channelId}>**`;
+    }
+    // 4. Server Mute/Deafen Changes
+    else {
+        if (oldState.serverMute !== newState.serverMute) {
+            eventType = newState.serverMute ? '🔇 Member Server Muted' : '🔊 Member Server Unmuted';
+            color = newState.serverMute ? '#FF0000' : '#00FF00';
+            description = `In **<#${newState.channelId}>**`;
+
+            // Try to find who muted
+            try {
+                const fetchedLogs = await guild.fetchAuditLogs({
+                    limit: 1,
+                    type: AuditLogEvent.MemberUpdate,
+                });
+                const muteLog = fetchedLogs.entries.first();
+                if (muteLog && muteLog.target.id === member.id && muteLog.createdTimestamp > (Date.now() - 5000)) {
+                    const change = muteLog.changes.find(c => c.key === 'mute');
+                    if (change) {
+                        fields.push({ name: '👮 By', value: `${muteLog.executor.tag}`, inline: true });
+                    }
+                }
+            } catch (e) { }
+        }
+        else if (oldState.serverDeaf !== newState.serverDeaf) {
+            eventType = newState.serverDeaf ? '🙉 Member Server Deafened' : '👂 Member Server Undeafened';
+            color = newState.serverDeaf ? '#FF0000' : '#00FF00';
+            description = `In **<#${newState.channelId}>**`;
+
+            // Try to find who deafened
+            try {
+                const fetchedLogs = await guild.fetchAuditLogs({
+                    limit: 1,
+                    type: AuditLogEvent.MemberUpdate,
+                });
+                const deafLog = fetchedLogs.entries.first();
+                if (deafLog && deafLog.target.id === member.id && deafLog.createdTimestamp > (Date.now() - 5000)) {
+                    const change = deafLog.changes.find(c => c.key === 'deaf');
+                    if (change) {
+                        fields.push({ name: '👮 By', value: `${deafLog.executor.tag}`, inline: true });
+                    }
+                }
+            } catch (e) { }
+        }
+    }
+
+    if (!eventType) return;
+
+    const embed = new EmbedBuilder()
+        .setColor(color)
+        .setTitle(eventType)
+        .setDescription(description)
+        .addFields({ name: '👤 User', value: `${member.user.tag} (${member.id})`, inline: true })
+        .setThumbnail(member.user.displayAvatarURL())
+        .setTimestamp();
+
+    if (fields.length > 0) {
+        embed.addFields(fields);
+    }
+
+    await sendAuditLog(guild, embed);
+}
+
 // Function to play TTS in voice channel
 async function playWelcomeTTS(guildId, memberName, isBot = false) {
     const connection = getVoiceConnection(guildId);
-
     if (!connection) return;
 
     try {
@@ -96,11 +205,16 @@ async function playWelcomeTTS(guildId, memberName, isBot = false) {
 module.exports = {
     name: 'voiceStateUpdate',
     async execute(oldState, newState) {
-        // Voice Lock Check - disconnect unauthorized users first
+        // 1. Audit Log (Voice)
+        if (oldState.guild) {
+            await handleVoiceAudit(oldState, newState);
+        }
+
+        // 2. Voice Lock
         const wasLocked = await handleVoiceLock(oldState, newState);
         if (wasLocked) return; // User was disconnected, no need to continue
 
-        // Check if user joined a voice channel (wasn't in one before, now is)
+        // 3. Welcome TTS
         const joinedChannel = !oldState.channelId && newState.channelId;
 
         // Check if user moved to a different channel

@@ -1,7 +1,7 @@
 {
   "1050450116881944687": {
     "voice": "annie_kr",
-    "botWelcome": true,
+    "botWelcome": false,
     "voiceChatEnabled": false
   }
 }

@@ -2,8 +2,48 @@ const { getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerS
 const fs = require('fs');
 const { generateTTS } = require('../utils/ttsHandler');
 const { getBotWelcome, getVoiceInfo, VOICES } = require('../utils/voiceSettings');
+const { isAllowed, getLockInfo } = require('../utils/voiceLock');
 
 // TTS generation logic moved to shared handler
+
+// Voice Lock Handler - disconnect unauthorized users from locked channels
+async function handleVoiceLock(oldState, newState) {
+    // Only handle joins (user moves to a new channel)
+    if (!newState.channelId) return false; // User left VC
+    if (oldState.channelId === newState.channelId) return false; // Same channel
+
+    const member = newState.member;
+    const guildId = newState.guild.id;
+    const channelId = newState.channelId;
+
+    // Check if the channel is locked
+    const lockInfo = getLockInfo(guildId, channelId);
+    if (!lockInfo) return false; // Not locked
+
+    // Check if member is allowed
+    if (isAllowed(guildId, channelId, member)) {
+        return false; // Allowed to join
+    }
+
+    // Not allowed - disconnect
+    try {
+        await member.voice.disconnect('Voice channel is locked');
+        console.log(`[VoiceLock] Disconnected ${member.user.tag} from locked channel ${channelId}`);
+
+        // Optional: Send DM to user
+        try {
+            await member.send({
+                content: `🔒 Kamu di-disconnect dari **${newState.channel.name}** karena channel sedang di-lock.`
+            });
+        } catch (e) {
+            // DM might be disabled
+        }
+        return true; // Handled
+    } catch (error) {
+        console.error(`[VoiceLock] Failed to disconnect ${member.user.tag}:`, error);
+        return false;
+    }
+}
 
 // Function to play TTS in voice channel
 async function playWelcomeTTS(guildId, memberName, isBot = false) {
@@ -56,6 +96,10 @@ async function playWelcomeTTS(guildId, memberName, isBot = false) {
 module.exports = {
     name: 'voiceStateUpdate',
     async execute(oldState, newState) {
+        // Voice Lock Check - disconnect unauthorized users first
+        const wasLocked = await handleVoiceLock(oldState, newState);
+        if (wasLocked) return; // User was disconnected, no need to continue
+
         // Check if user joined a voice channel (wasn't in one before, now is)
         const joinedChannel = !oldState.channelId && newState.channelId;
 

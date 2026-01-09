@@ -104,7 +104,7 @@ module.exports = {
             if (error.message.includes('503')) {
                 errorMessage = "❌ Server AI lagi overload. Coba lagi 1 menit lagi!";
             } else if (error.message.includes('429')) {
-                errorMessage = "❌ Kuota AI Gratisan habis. Tunggu sebentar ya!";
+                errorMessage = "❌ Kuota AI Gratisan habis. Update setiap jam 03.00 PM";
             }
 
             await message.reply(errorMessage);
@@ -135,7 +135,7 @@ Identity & Gaya Bicara:
         },
         {
             role: "model",
-            parts: [{ text: "oke ngab aman. gue rusdi, asli ngawi. mau bahas apaan nih?" }]
+            parts: [{ text: "aman aja wok. gw rusdi, asli ngawi loh ya. mau bahas apaan?" }]
         }
     ];
 

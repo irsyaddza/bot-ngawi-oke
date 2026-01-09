@@ -241,9 +241,9 @@ async function handleRoasting(message, apiKey) {
     const imageBuffer = await imageResp.arrayBuffer();
 
     const prompt = `Lihat gambar ini (ini adalah foto profil Discord seseorang).
-    Berikan komentar roasting yang lucu, pedas tapi bercanda, atau pujian yang unik dalam Bahasa Indonesia gaul/santai.
-    Komentarnya harus sangat spesifik dengan visual yang ada di gambar.
-    Jangan terlalu panjang, cukup 3 sampai 9 kata yang ngena.
+    Berikan komentar roasting yang lucu, pedas ngena banget atau pujian hanya untuk cewek, tapi kalo fotonya cewek sarkasin kalo dia halu, karena yang pake pp cewek pasti aslinya cowok. Roastingnya yang unik dalam Bahasa Indonesia gaul/santai.
+    Komentarnya harus sangat spesifik dengan visual yang ada di gambar. Dan kalo pp anime, roasting sampe tuh wibu mau touch some grass.
+    Jangan terlalu panjang, cukup 3 sampai 20 kata yang ngena.
     Gunakan gaya bahasa seperti anak muda Indonesia (wok, bjir, wkwk, dll).
     Jika gambarnya default discord (polos), katakan sesuatu tentang betapa membosankannya usernya.`;
 

@@ -1,14 +1,74 @@
 const { EmbedBuilder } = require('discord.js');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { parseAdminCommand, executeAdminCommand } = require('../utils/adminCommands');
+const { getLogic } = require('../utils/logicState');
 
 // --- MEMORY STORAGE ---
-// Key: userId-channelId, Value: Array of { role: "user" | "model", parts: [{ text: string }] }
+// Key: userId-channelId, Value: Array of messages
 const chatHistory = new Map();
 
-// Helper to try multiple models
-async function generateWithFallback(apiKey, prompt, imagePart = null, history = []) {
-    // Reordered: gemini-flash-latest might have better free quotas than bleeding edge versions
+// OpenRouter API for DeepSeek
+async function generateWithOpenRouter(prompt, history = []) {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+        throw new Error('OPENROUTER_API_KEY belum disetting di .env!');
+    }
+
+    // Convert Gemini history format to OpenRouter format
+    const messages = [];
+
+    // System prompt
+    messages.push({
+        role: 'system',
+        content: `Kamu adalah Rusdi from Ngawi. Kamu itu orangnya asik, lucu, dan santai. Lu tinggal di Ngawi (Jawa Timur).
+        
+Identity & Gaya Bicara:
+- Lu bukan AI, lu Rusdi. Kalau ditanya, jawab aja lu Rusdi.
+- Jangan pernah nyebut diri lu "Gen Z" atau "Teman Virtual". Bertingkahlah natural kayak orang biasa.
+- Pake bahasa santai/tongkrongan (gue/lu, wkwk, bjir, anjir, ngab, slebew).
+- Typing lowercase (huruf kecil) biar gak kaku.
+- Jawab singkat, padat, jelas, gak usah bertele-tele kayak wikipedia.
+- Kalau ada yang curhat, tanggepin kayak temen, kadang sarkas dikit lucu juga.`
+    });
+
+    // Add history (skip first 2 which are system prompts in Gemini format)
+    for (let i = 2; i < history.length; i++) {
+        const msg = history[i];
+        messages.push({
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            content: msg.parts[0].text
+        });
+    }
+
+    // Add current prompt
+    messages.push({ role: 'user', content: prompt });
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://discord.com',
+            'X-Title': 'Bot Ngawi Oke'
+        },
+        body: JSON.stringify({
+            model: 'tngtech/deepseek-r1t2-chimera:free',
+            messages: messages,
+            max_tokens: 500
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`OpenRouter error: ${error}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+}
+
+// Helper to try multiple Gemini models
+async function generateWithGemini(apiKey, prompt, imagePart = null, history = []) {
     const models = [
         "gemini-flash-latest",
         "gemini-2.0-flash",
@@ -24,10 +84,8 @@ async function generateWithFallback(apiKey, prompt, imagePart = null, history = 
 
             let result;
             if (imagePart) {
-                // Vision Mode (No History for now)
                 result = await model.generateContent([prompt, imagePart]);
             } else {
-                // Chat Mode (With History)
                 const chat = model.startChat({
                     history: history,
                     generationConfig: {
@@ -43,7 +101,6 @@ async function generateWithFallback(apiKey, prompt, imagePart = null, history = 
             console.error(`Error with model ${modelName}:`, error.message);
             lastError = error;
 
-            // Continue if 404 (Not Found), 503 (Overloaded), or 429 (Rate Limit)
             if (error.message.includes('404') || error.message.includes('503') || error.message.includes('429')) {
                 continue;
             }
@@ -116,6 +173,7 @@ module.exports = {
 async function handleChat(message, apiKey, userMessage) {
     const userId = message.author.id;
     const historyKey = `${userId}-${message.channel.id}`;
+    const currentLogic = getLogic(message.guildId);
 
     // Initialize or Retrieve History
     let history = chatHistory.get(historyKey) || [
@@ -139,8 +197,13 @@ Identity & Gaya Bicara:
         }
     ];
 
-    // Generate Response
-    const responseText = await generateWithFallback(apiKey, userMessage, null, history);
+    // Generate Response based on current logic
+    let responseText;
+    if (currentLogic === 'deepseek') {
+        responseText = await generateWithOpenRouter(userMessage, history);
+    } else {
+        responseText = await generateWithGemini(apiKey, userMessage, null, history);
+    }
 
     // Update History
     // Gemini History Format: { role: 'user'|'model', parts: [{ text: '...' }] }
@@ -191,7 +254,7 @@ async function handleRoasting(message, apiKey) {
         }
     };
 
-    const text = await generateWithFallback(apiKey, prompt, imagePart);
+    const text = await generateWithGemini(apiKey, prompt, imagePart);
 
     const embed = new EmbedBuilder()
         .setDescription(text)

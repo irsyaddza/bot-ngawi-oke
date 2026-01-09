@@ -10,6 +10,7 @@ module.exports = {
                 .setRequired(true)
                 .addChoices(
                     { name: '🤖 Gemini AI', value: 'gemini' },
+                    { name: '🟢 Deepseek (OpenRouter)', value: 'openrouter' },
                     { name: '🎙️ ElevenLabs', value: 'elevenlabs' }
                 )
         ),
@@ -22,6 +23,8 @@ module.exports = {
         try {
             if (provider === 'gemini') {
                 await showGeminiDashboard(interaction);
+            } else if (provider === 'openrouter') {
+                await showOpenRouterDashboard(interaction);
             } else if (provider === 'elevenlabs') {
                 await showElevenLabsDashboard(interaction);
             }
@@ -128,6 +131,74 @@ async function showGeminiDashboard(interaction) {
             value: errorReason
         });
     }
+
+    await interaction.editReply({ embeds: [embed] });
+}
+
+async function showOpenRouterDashboard(interaction) {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+
+    if (!apiKey) {
+        return interaction.editReply({
+            content: '❌ `OPENROUTER_API_KEY` tidak ditemukan di `.env`!'
+        });
+    }
+
+    let creditBalance = 'Unknown';
+    let usageInfo = 'Unknown';
+    let isAvailable = false;
+    let rateLimit = 'Unknown';
+
+    try {
+        // Fetch key info from OpenRouter
+        const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            isAvailable = true;
+
+            const info = data.data || data;
+
+            // Credit limit (null = unlimited for free tier)
+            if (info.limit !== null && info.limit !== undefined) {
+                creditBalance = `$${Number(info.limit).toFixed(4)}`;
+            } else {
+                creditBalance = info.is_free_tier ? '♾️ Free Tier' : 'Unlimited';
+            }
+
+            // Usage stats
+            usageInfo = `$${Number(info.usage || 0).toFixed(4)}`;
+
+            // Daily/Monthly usage
+            const dailyUsage = `$${Number(info.usage_daily || 0).toFixed(4)}`;
+            const monthlyUsage = `$${Number(info.usage_monthly || 0).toFixed(4)}`;
+            rateLimit = `Daily: ${dailyUsage}\nMonthly: ${monthlyUsage}`;
+
+        } else {
+            console.error('OpenRouter API error status:', response.status);
+        }
+    } catch (error) {
+        console.error('OpenRouter API error:', error);
+    }
+
+    const embed = new EmbedBuilder()
+        .setTitle('🟢 OpenRouter Dashboard')
+        .setColor(isAvailable ? '#00D4AA' : '#FF5555')
+        .addFields(
+            { name: '🔌 Status', value: isAvailable ? '✅ Connected' : '❌ Error', inline: true },
+            { name: '📊 API Key', value: '✅ Configured', inline: true },
+            { name: '🤖 Model', value: '`deepseek-r1t2-chimera`', inline: true },
+            { name: '� Tier', value: creditBalance, inline: true },
+            { name: '📈 Total Usage', value: usageInfo, inline: true },
+            { name: '📊 Usage Stats', value: rateLimit, inline: true }
+        )
+        .setFooter({ text: 'Powered by OpenRouter.ai' })
+        .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
 }

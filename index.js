@@ -34,7 +34,7 @@ client.distube = new DisTube(client, {
     plugins: [
         new SpotifyPlugin(),
         new SoundCloudPlugin(),
-        new YtDlpPlugin()
+        new YtDlpPlugin({ update: false })
     ]
 });
 

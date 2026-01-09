@@ -49,6 +49,43 @@ module.exports = {
             return;
         }
 
+        // Handle Download Caption Button
+        if (interaction.isButton() && interaction.customId.startsWith('dl_caption_')) {
+            try {
+                const captionId = interaction.customId.replace('dl_caption_', '');
+
+                // Get caption from cache
+                const downloadCommand = require('../commands/download.js');
+                const captionData = downloadCommand.captionCache?.get(captionId);
+
+                if (!captionData || Date.now() > captionData.expires) {
+                    return interaction.reply({
+                        content: 'Caption sudah expired. Download ulang videonya.',
+                        ephemeral: true
+                    });
+                }
+
+                const caption = captionData.text;
+
+                await interaction.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('#a200ff')
+                            .setTitle('Caption')
+                            .setDescription(caption.length > 4000 ? caption.substring(0, 4000) + '...' : caption)
+                    ],
+                    ephemeral: true
+                });
+            } catch (error) {
+                console.error('Caption error:', error);
+                await interaction.reply({
+                    content: 'Failed to load caption.',
+                    ephemeral: true
+                });
+            }
+            return;
+        }
+
         // Handle Music Button Interactions
         if (interaction.isButton() && interaction.customId.startsWith('music_')) {
             const queue = interaction.client.distube.getQueue(interaction.guildId);

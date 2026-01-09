@@ -4,7 +4,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![DisTube](https://img.shields.io/badge/DisTube-FF0000?style=for-the-badge&logo=discogs&logoColor=white)](https://distube.js.org/)
-[![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white)](https://www.spotify.com/)
+[![yt-dlp](https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/yt-dlp/yt-dlp)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
 
 **Fun discord bot**  
@@ -12,6 +12,12 @@
 ---
 
 ## 🔥 Fitur Utama
+
+### 📥 All-in-One Downloader (Baru!)
+Mau nyomot video dari mana aja? Gas!
+- **1000+ Sites Supported**: TikTok, Facebook, Instagram, Twitter/X, YouTube, Reddit, dan banyak lagi.
+- **Smart Embed**: Tampilan bersih, ada tombol "source"
+- **Audio Only**: Bisa convert video jadi MP3 juga kalau cuma butuh suaranya.
 
 ### 🎵 Music System (Powered by DisTube)
 Bosen sepi? Rusdi bisa nyetel lagu dari mana aja:
@@ -35,6 +41,13 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
 
 ## 🛠️ Daftar Command
 
+### 📥 Downloader & Utility
+| Command | Apa gunanya? |
+| :--- | :--- |
+| **/dl** `[url]` | Download video dari TikTok, FB, IG, YT, dll. |
+| **/dashboard** | Cek kuota API Gemini/ElevenLabs biar gak boncos. |
+| **/ping** | Cek seberapa lemot bot merespon (latency). |
+
 ### 🔊 Music & Voice
 | Command | Apa gunanya? |
 | :--- | :--- |
@@ -43,14 +56,13 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
 | **/queue** | Intip lagu apa aja yang bakal diputer selanjutnya. |
 | **/say** `[pesan]` | Suruh bot ngomong sesuatu di VC. |
 | **/join** / **/leave** | Panggil atau usir bot dari voice channel. |
+| **/changevoice** | Ganti-ganti suara bot (Edge/ElevenLabs). |
 
-### 👮 Moderasi & Utility
+### 👮 Moderasi
 | Command | Apa gunanya? |
 | :--- | :--- |
 | **/giverole** / **/takerole** | Atur role member gak pake ribet. |
 | **/send** `[channel]` | Kirim pesan lewat bot ke channel lain. |
-| **/changevoice** | Ganti-ganti suara bot (Edge/ElevenLabs). |
-| **/dashboard** | Cek kuota API Gemini/ElevenLabs biar gak boncos. |
 
 ---
 
@@ -65,7 +77,7 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
 3.  **Install alat tempurnya**:
     ```bash
     npm install
-    # ffmpeg udah dapet di dalem (ffmpeg-static), gak perlu install manual.
+    # ffmpeg & yt-dlp udah dapet di dalem, gak perlu install manual.
     ```
 4.  **Isi `.env`**:
     Pake file `.env` dan masukin token-token sakti lu:
@@ -92,7 +104,7 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
 <div align="center">
   <img src="https://img.shields.io/badge/Discord.js-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord.js" />
   <img src="https://img.shields.io/badge/DisTube-FF0000?style=for-the-badge&logo=discogs&logoColor=white" alt="DisTube" />
-  <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" />
+  <img src="https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="yt-dlp" />
   <img src="https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify" />
   <img src="https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
   <p><i>Plus msedge-tts, ElevenLabs SDK, & FFmpeg Static</i></p>

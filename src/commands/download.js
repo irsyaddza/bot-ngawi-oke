@@ -5,15 +5,16 @@ const path = require('path');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
-// Get yt-dlp path from @distube/yt-dlp package
-const ytDlpPath = path.join(__dirname, '../../node_modules/@distube/yt-dlp/bin/yt-dlp.exe');
-
-// Check if binary exists
-if (!fs.existsSync(ytDlpPath)) {
-    console.error('yt-dlp binary not found at:', ytDlpPath);
+// Get yt-dlp path - use system yt-dlp on Linux, package binary on Windows
+let ytDlpPath;
+if (process.platform === 'win32') {
+    ytDlpPath = path.join(__dirname, '../../node_modules/@distube/yt-dlp/bin/yt-dlp.exe');
 } else {
-    console.log('yt-dlp binary found at:', ytDlpPath);
+    // On Linux (Railway), use system-installed yt-dlp
+    ytDlpPath = 'yt-dlp';
 }
+
+console.log(`[Download] Platform: ${process.platform}, yt-dlp path: ${ytDlpPath}`);
 
 module.exports = {
     data: new SlashCommandBuilder()

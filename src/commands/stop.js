@@ -33,11 +33,13 @@ module.exports = {
 
         try {
             await queue.stop();
+            queue.voice.leave(); // Disconnect from voice channel
+
             await interaction.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor('#a200ff')
-                        .setDescription('⏹️ Stopped the music and cleared the queue!')
+                        .setDescription('⏹️ Stopped the music and disconnected!')
                 ]
             });
         } catch (error) {

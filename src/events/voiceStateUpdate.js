@@ -47,7 +47,7 @@ async function handleVoiceLock(oldState, newState) {
     }
 }
 
-// Audit Log Handler for Voice
+// Audit Log Handler for Voice - KICK, MOVE, MUTE/DEAFEN only (no join/leave)
 async function handleVoiceAudit(oldState, newState) {
     if (!oldState.guild) return;
 
@@ -56,22 +56,11 @@ async function handleVoiceAudit(oldState, newState) {
 
     let eventType = '';
     let description = '';
-    let color = '#FFAA00'; // Default Orange
+    let color = '#FFAA00';
     let fields = [];
 
-    // 1. Join
-    if (!oldState.channelId && newState.channelId) {
-        eventType = '🎤 Member Joined Voice';
-        color = '#00FF00'; // Green
-        description = `Joined **<#${newState.channelId}>**`;
-    }
-    // 2. Leave
-    else if (oldState.channelId && !newState.channelId) {
-        eventType = '🎤 Member Left Voice';
-        color = '#FF0000'; // Red
-        description = `Left **<#${oldState.channelId}>**`;
-
-        // Check for Kick
+    // 1. Kick (Leave but forced by moderator)
+    if (oldState.channelId && !newState.channelId) {
         try {
             const fetchedLogs = await guild.fetchAuditLogs({
                 limit: 1,
@@ -81,78 +70,64 @@ async function handleVoiceAudit(oldState, newState) {
 
             if (kickLog && kickLog.target?.id === member.id && kickLog.createdTimestamp > (Date.now() - 5000)) {
                 eventType = '👢 Member Disconnected (Kick)';
-                color = '#FF4500'; // Red-Orange
+                color = '#FF4500';
+                description = `Kicked from **<#${oldState.channelId}>**`;
                 fields.push({ name: '👮 Kicked by', value: `${kickLog.executor?.tag || 'Unknown'}`, inline: true });
             }
-        } catch (e) {
-            console.error('Failed to fetch audit logs for voice kick:', e);
-        }
+        } catch (e) { }
     }
-    // 3. Move
+    // 2. Move
     else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-        eventType = '🎤 Member Moved Voice';
-        color = '#00AAFF'; // Blue
+        eventType = '🔀 Member Moved Voice';
+        color = '#00AAFF';
         description = `Moved from **<#${oldState.channelId}>** to **<#${newState.channelId}>**`;
     }
-    // 4. Server Mute/Deafen Changes
-    else {
-        if (oldState.serverMute !== newState.serverMute) {
-            eventType = newState.serverMute ? '🔇 Member Server Muted' : '🔊 Member Server Unmuted';
-            color = newState.serverMute ? '#FF0000' : '#00FF00';
-            description = `In **<#${newState.channelId}>**`;
+    // 3. Server Mute/Deafen
+    else if (oldState.serverMute !== newState.serverMute) {
+        eventType = newState.serverMute ? '� Server Muted' : '🔊 Server Unmuted';
+        color = newState.serverMute ? '#FF0000' : '#00FF00';
+        description = `In **<#${newState.channelId}>**`;
 
-            // Try to find who muted
-            try {
-                const fetchedLogs = await guild.fetchAuditLogs({
-                    limit: 1,
-                    type: AuditLogEvent.MemberUpdate,
-                });
-                const muteLog = fetchedLogs.entries.first();
-                if (muteLog && muteLog.target.id === member.id && muteLog.createdTimestamp > (Date.now() - 5000)) {
-                    const change = muteLog.changes.find(c => c.key === 'mute');
-                    if (change) {
-                        fields.push({ name: '👮 By', value: `${muteLog.executor.tag}`, inline: true });
-                    }
-                }
-            } catch (e) { }
-        }
-        else if (oldState.serverDeaf !== newState.serverDeaf) {
-            eventType = newState.serverDeaf ? '🙉 Member Server Deafened' : '👂 Member Server Undeafened';
-            color = newState.serverDeaf ? '#FF0000' : '#00FF00';
-            description = `In **<#${newState.channelId}>**`;
+        try {
+            const fetchedLogs = await guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberUpdate });
+            const log = fetchedLogs.entries.first();
+            if (log && log.target?.id === member.id && log.createdTimestamp > (Date.now() - 5000)) {
+                fields.push({ name: '👮 By', value: `${log.executor?.tag || 'Unknown'}`, inline: true });
+            }
+        } catch (e) { }
+    }
+    else if (oldState.serverDeaf !== newState.serverDeaf) {
+        eventType = newState.serverDeaf ? '🙉 Server Deafened' : '👂 Server Undeafened';
+        color = newState.serverDeaf ? '#FF0000' : '#00FF00';
+        description = `In **<#${newState.channelId}>**`;
 
-            // Try to find who deafened
-            try {
-                const fetchedLogs = await guild.fetchAuditLogs({
-                    limit: 1,
-                    type: AuditLogEvent.MemberUpdate,
-                });
-                const deafLog = fetchedLogs.entries.first();
-                if (deafLog && deafLog.target.id === member.id && deafLog.createdTimestamp > (Date.now() - 5000)) {
-                    const change = deafLog.changes.find(c => c.key === 'deaf');
-                    if (change) {
-                        fields.push({ name: '👮 By', value: `${deafLog.executor.tag}`, inline: true });
-                    }
-                }
-            } catch (e) { }
-        }
+        try {
+            const fetchedLogs = await guild.fetchAuditLogs({ limit: 1, type: AuditLogEvent.MemberUpdate });
+            const log = fetchedLogs.entries.first();
+            if (log && log.target?.id === member.id && log.createdTimestamp > (Date.now() - 5000)) {
+                fields.push({ name: '👮 By', value: `${log.executor?.tag || 'Unknown'}`, inline: true });
+            }
+        } catch (e) { }
     }
 
+    // Only send if we have an event
     if (!eventType) return;
 
     const embed = new EmbedBuilder()
         .setColor(color)
         .setTitle(eventType)
         .setDescription(description)
-        .addFields({ name: '👤 User', value: `${member.user.tag} (${member.id})`, inline: true })
-        .setThumbnail(member.user.displayAvatarURL())
+        .setAuthor({
+            name: member.user.tag,
+            iconURL: member.user.displayAvatarURL({ size: 32 })
+        })
         .setTimestamp();
 
     if (fields.length > 0) {
         embed.addFields(fields);
     }
 
-    await sendAuditLog(guild, embed);
+    await sendAuditLog(guild.id, guild.client, embed);
 }
 
 // Function to play TTS in voice channel
@@ -205,7 +180,7 @@ async function playWelcomeTTS(guildId, memberName, isBot = false) {
 module.exports = {
     name: 'voiceStateUpdate',
     async execute(oldState, newState) {
-        // 1. Audit Log (Voice)
+        // 1. Audit Log (Voice) - KICK ONLY
         if (oldState.guild) {
             await handleVoiceAudit(oldState, newState);
         }

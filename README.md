@@ -6,6 +6,7 @@
 [![DisTube](https://img.shields.io/badge/DisTube-FF0000?style=for-the-badge&logo=discogs&logoColor=white)](https://distube.js.org/)
 [![yt-dlp](https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/yt-dlp/yt-dlp)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
 
 **Fun discord bot**  
 
@@ -13,7 +14,7 @@
 
 ## 🔥 Fitur Utama
 
-### 📥 All-in-One Downloader (Baru!)
+### 📥 All-in-One Downloader
 Mau nyomot video dari mana aja? Gas!
 - **1000+ Sites Supported**: TikTok, Facebook, Instagram, Twitter/X, YouTube, Reddit, dan banyak lagi.
 - **Smart Embed**: Tampilan bersih, ada tombol "source"
@@ -32,10 +33,23 @@ Ngobrol tanpa mic? Bisa banget:
 - **Voice Chat AI**: Panggil "Halo Rusdi", dan si bot bakal jawab pake suara aslinya.
 
 ### 🤖 Smart AI Interaction
-Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
-- **Chatting**: Bisa curhat atau nanyain hal gak guna.
+Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini & DeepSeek:
+- **Persistent Memory**: Chat history disimpan ke database, Rusdi ingat percakapan sebelumnya!
+- **Dual AI Engine**: Bisa switch antara Gemini dan DeepSeek sesuai kebutuhan.
 - **Server Info**: Cek kondisi server lewat chat biasa.
-- **Moderator**: Rusdi bisa nge-kick, ban, atau hapus pesan kalo disuruh (asal ada izin).
+- **Moderator**: Rusdi bisa nge-kick, ban, mute, atau hapus pesan kalo disuruh (asal ada izin).
+
+### 🔒 Voice Lock (Baru!)
+Kunci voice channel biar gak sembarang orang join:
+- **Whitelist System**: Pilih user/role yang boleh join.
+- **Smart Block**: User yang gak berhak auto di-kick tanpa ganggu yang udah di dalem.
+- **Persistent**: Konfigurasi tetap aman meski bot restart.
+
+### 📋 Audit Log (Baru!)
+Pantau aktivitas server secara real-time:
+- **Voice Events**: Join, Leave, Mute, Deafen, Kick.
+- **Member Events**: Join, Leave, Ban, Unban.
+- **Mod Tracking**: Tau siapa yang nge-kick/ban/mute.
 
 ---
 
@@ -45,7 +59,7 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
 | Command | Apa gunanya? |
 | :--- | :--- |
 | **/dl** `[url]` | Download video dari TikTok, FB, IG, YT, dll. |
-| **/dashboard** | Cek kuota API Gemini/ElevenLabs biar gak boncos. |
+| **/dashboard** | Cek kuota API Gemini/ElevenLabs/OpenRouter. |
 | **/ping** | Cek seberapa lemot bot merespon (latency). |
 
 ### 🔊 Music & Voice
@@ -58,11 +72,20 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
 | **/join** / **/leave** | Panggil atau usir bot dari voice channel. |
 | **/changevoice** | Ganti-ganti suara bot (Edge/ElevenLabs). |
 
-### 👮 Moderasi
+### 👮 Moderasi & Admin
 | Command | Apa gunanya? |
 | :--- | :--- |
 | **/giverole** / **/takerole** | Atur role member gak pake ribet. |
 | **/send** `[channel]` | Kirim pesan lewat bot ke channel lain. |
+| **/voicelock** | Lock/Unlock voice channel + whitelist. |
+| **/auditlog** | Setting channel untuk audit log server. |
+
+### 🤖 AI & Database
+| Command | Apa gunanya? |
+| :--- | :--- |
+| **/logic** | Switch AI antara Gemini dan DeepSeek. |
+| **/logiccheck** | Cek AI mana yang lagi aktif. |
+| **/chatdb** | Lihat statistik database chat history. |
 
 ---
 
@@ -87,6 +110,7 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
     GUILD_ID=
     ELEVENLABS_API_KEY=
     GEMINI_API_KEY=
+    OPENROUTER_API_KEY=
     ```
 5.  **Daftarin Command**:
     ```bash
@@ -107,7 +131,8 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini:
   <img src="https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="yt-dlp" />
   <img src="https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify" />
   <img src="https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
-  <p><i>Plus msedge-tts, ElevenLabs SDK, & FFmpeg Static</i></p>
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  <p><i>Plus msedge-tts, ElevenLabs SDK, OpenRouter, & FFmpeg Static</i></p>
 </div>
 
 ---

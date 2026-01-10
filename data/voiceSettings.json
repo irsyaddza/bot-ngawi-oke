@@ -1,7 +1,7 @@
 {
   "1050450116881944687": {
     "voice": "putra",
-    "botWelcome": false,
+    "botWelcome": true,
     "voiceChatEnabled": false
   }
 }

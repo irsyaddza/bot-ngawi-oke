@@ -79,10 +79,10 @@ async function handleVoiceAudit(oldState, newState) {
             });
             const kickLog = fetchedLogs.entries.first();
 
-            if (kickLog && kickLog.target.id === member.id && kickLog.createdTimestamp > (Date.now() - 5000)) {
+            if (kickLog && kickLog.target?.id === member.id && kickLog.createdTimestamp > (Date.now() - 5000)) {
                 eventType = '👢 Member Disconnected (Kick)';
                 color = '#FF4500'; // Red-Orange
-                fields.push({ name: '👮 Kicked by', value: `${kickLog.executor.tag}`, inline: true });
+                fields.push({ name: '👮 Kicked by', value: `${kickLog.executor?.tag || 'Unknown'}`, inline: true });
             }
         } catch (e) {
             console.error('Failed to fetch audit logs for voice kick:', e);

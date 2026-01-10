@@ -1,4 +1,4 @@
-# 🤖 Bot Ngawi Oke (Rusdi Edition)
+# Rusdi Fun Discord BOT
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.js.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
@@ -59,7 +59,7 @@ Pantau aktivitas server secara real-time:
 | Command | Apa gunanya? |
 | :--- | :--- |
 | **/dl** `[url]` | Download video dari TikTok, FB, IG, YT, dll. |
-| **/dashboard** | Cek kuota API Gemini/ElevenLabs/OpenRouter. |
+| **/dashboard** | Cek system statusGemini/ElevenLabs/OpenRouter. |
 | **/ping** | Cek seberapa lemot bot merespon (latency). |
 
 ### 🔊 Music & Voice

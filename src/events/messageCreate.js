@@ -3,6 +3,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { parseAdminCommand, executeAdminCommand } = require('../utils/adminCommands');
 const { getLogic } = require('../utils/logicState');
 const { saveHistory, loadHistory } = require('../utils/chatHistoryDB');
+const { parseInteraction, handleTemplateAction, handleDuel, handleShip } = require('../utils/interactionHandler');
 
 // --- MEMORY STORAGE (Fallback) ---
 // Key: userId-channelId, Value: Array of messages
@@ -113,6 +114,43 @@ async function generateWithGemini(apiKey, prompt, imagePart = null, history = []
     throw lastError;
 }
 
+// Roast a user with AI (follows guild logic setting)
+async function handleRoastUser(message, apiKey, target) {
+    const currentLogic = getLogic(message.guildId);
+
+    const prompt = `Kamu adalah Rusdi, orang Ngawi temannya Dreamybull yang suka bercanda. Buatkan roasting kasar dan toxic untuk seseorang bernama "${target.username}". 
+Roasting harus:
+- Kasar dan Toxic bahasa inggris ataupun indonesia
+- Menggunakan bahasa Indonesia campur Jawa Inggris juga boleh, contoh ngen*ot, fuckin, goblok, tolol, bengak, kampang, tempek
+- Max 2-3 kalimat
+- Bisa sindir nama/username-nya`;
+
+    try {
+        let roastText;
+
+        if (currentLogic === 'deepseek') {
+            roastText = await generateWithOpenRouter(prompt, []);
+        } else {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+            const result = await model.generateContent(prompt);
+            roastText = result.response.text().trim();
+        }
+
+        const embed = new EmbedBuilder()
+            .setColor('#FF6B6B')
+            .setTitle('🔥 ROASTED!')
+            .setDescription(roastText)
+            .setThumbnail(target.displayAvatarURL({ size: 128 }))
+            .setFooter({ text: `Requested by ${message.author.username} • ${currentLogic === 'deepseek' ? 'DeepSeek' : 'Gemini'}` });
+
+        await message.reply({ embeds: [embed] });
+    } catch (error) {
+        console.error('Roast error:', error);
+        await message.reply('😅 Gagal roasting, AI-nya lagi error!');
+    }
+}
+
 module.exports = {
     name: 'messageCreate',
     async execute(message) {
@@ -134,6 +172,26 @@ module.exports = {
             return await executeAdminCommand(adminCommand, message);
         }
 
+        // === FUN INTERACTION CHECK ===
+        const interaction = parseInteraction(cleanedContent, message);
+        if (interaction) {
+            const { action, target, targets } = interaction;
+
+            // Template actions (gampar, slap, kiss, hug, pat)
+            if (['gampar', 'slap', 'kiss', 'hug', 'pat'].includes(action)) {
+                return await handleTemplateAction(message, action, target);
+            }
+            // Duel
+            if (action === 'duel') {
+                return await handleDuel(message, target);
+            }
+            // Ship
+            if (action === 'ship' && targets) {
+                return await handleShip(message, targets[0], targets[1]);
+            }
+            // Roast - handled by AI below
+        }
+
         // === AI CHAT MODE ===
         // Check API Key
         const apiKey = process.env.GEMINI_API_KEY;
@@ -146,10 +204,17 @@ module.exports = {
         try {
             // === FEATURE SWITCHER ===
             const isRoasting = cleanedContent.toLowerCase().includes('pp');
+            const isRoastCommand = cleanedContent.toLowerCase().startsWith('roast ') && message.mentions.users.size > 1;
 
             if (isRoasting) {
                 // --- PP ROASTING MODE ---
                 await handleRoasting(message, apiKey);
+            } else if (isRoastCommand) {
+                // --- ROAST USER MODE ---
+                const target = message.mentions.users.filter(u => u.id !== message.client.user.id).first();
+                if (target) {
+                    await handleRoastUser(message, apiKey, target);
+                }
             } else {
                 // --- CHAT AI MODE ---
                 await handleChat(message, apiKey, cleanedContent);

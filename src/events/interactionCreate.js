@@ -49,6 +49,13 @@ module.exports = {
             return;
         }
 
+        // Handle /cmd Category Select Menu
+        if (interaction.isStringSelectMenu() && interaction.customId === 'cmd_category') {
+            const { handleCmdSelect } = require('../commands/cmd.js');
+            await handleCmdSelect(interaction);
+            return;
+        }
+
         // Handle Download Caption Button
         if (interaction.isButton() && interaction.customId.startsWith('dl_caption_')) {
             try {

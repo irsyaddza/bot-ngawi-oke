@@ -166,7 +166,7 @@ async function playWelcomeTTS(guildId, memberName, isBot = false) {
 
         if (isBot) {
             message = "Rusdi from ngawi is here!";
-            voice = VOICES.putra; // Use Putra for bot welcome
+            voice = getVoiceInfo(guildId); // Use current guild voice setting
         } else {
             const welcomeMessages = [
                 `Halo ${memberName}, selamat datang!`,

@@ -24,13 +24,13 @@ module.exports = {
             const db = new Database(DB_PATH, { readonly: true });
 
             // Get stats
-            const totalConversations = db.prepare('SELECT COUNT(*) as count FROM chat_history').get().count;
+            const totalGuilds = db.prepare('SELECT COUNT(*) as count FROM chat_history').get().count;
 
-            // Get all rows to calculate total messages
+            // Get all rows
             const allRows = db.prepare('SELECT messages, history_key, updated_at FROM chat_history ORDER BY updated_at DESC').all();
 
             let totalMessages = 0;
-            const topChatters = [];
+            const guildStats = [];
 
             allRows.forEach(row => {
                 try {
@@ -38,11 +38,8 @@ module.exports = {
                     const msgCount = messages.length - 2; // Exclude system prompt
                     totalMessages += msgCount;
 
-                    // Extract user ID from history_key (userId-channelId)
-                    const userId = row.history_key.split('-')[0];
-                    topChatters.push({
-                        key: row.history_key,
-                        userId,
+                    guildStats.push({
+                        guildId: row.history_key, // Now it's just guildId
                         count: msgCount,
                         lastActive: row.updated_at
                     });
@@ -50,46 +47,39 @@ module.exports = {
             });
 
             // Sort by message count
-            topChatters.sort((a, b) => b.count - a.count);
+            guildStats.sort((a, b) => b.count - a.count);
 
             // Get database file size
             const stats = fs.statSync(DB_PATH);
             const dbSize = (stats.size / 1024).toFixed(2); // KB
 
+            // Check this guild's stats
+            const thisGuild = guildStats.find(g => g.guildId === interaction.guildId);
+
             // Build embed
             const embed = new EmbedBuilder()
                 .setColor('#00AAFF')
                 .setTitle('📊 Chat History Database')
-                .setDescription('Statistik memori percakapan AI')
+                .setDescription('Statistik memori percakapan AI (per-server)')
                 .addFields(
-                    { name: '💬 Total Conversations', value: `${totalConversations}`, inline: true },
+                    { name: '🏠 Total Servers', value: `${totalGuilds}`, inline: true },
                     { name: '📝 Total Messages', value: `${totalMessages}`, inline: true },
                     { name: '💾 Database Size', value: `${dbSize} KB`, inline: true }
                 )
                 .setTimestamp();
 
-            // Add top chatters (max 5)
-            if (topChatters.length > 0) {
-                const topList = topChatters.slice(0, 5).map((c, i) => {
-                    const medal = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][i];
-                    return `${medal} <@${c.userId}> - ${c.count} msgs`;
-                }).join('\n');
-
-                embed.addFields({ name: '🔥 Top Chatters', value: topList, inline: false });
+            // This guild's stats
+            if (thisGuild) {
+                const lastActive = Math.floor(thisGuild.lastActive / 1000);
+                embed.addFields(
+                    { name: '📊 Server Ini', value: `${thisGuild.count} messages`, inline: true },
+                    { name: '🕐 Last Activity', value: `<t:${lastActive}:R>`, inline: true }
+                );
+            } else {
+                embed.addFields({ name: '📊 Server Ini', value: 'Belum ada data', inline: true });
             }
 
-            // Add recent activity (last 5)
-            if (allRows.length > 0) {
-                const recentList = allRows.slice(0, 5).map(row => {
-                    const userId = row.history_key.split('-')[0];
-                    const time = Math.floor(row.updated_at / 1000);
-                    return `<@${userId}> - <t:${time}:R>`;
-                }).join('\n');
-
-                embed.addFields({ name: '🕐 Recent Activity', value: recentList, inline: false });
-            }
-
-            embed.setFooter({ text: `Database: chat_history.db` });
+            embed.setFooter({ text: `Database: chat_history.db | Use /clearchat to reset` });
 
             db.close();
 

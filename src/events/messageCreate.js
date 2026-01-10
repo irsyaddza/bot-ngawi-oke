@@ -173,9 +173,11 @@ module.exports = {
 };
 
 // --- LOGIC: CHAT ---
+const SUMMARIZE_THRESHOLD = 30; // Summarize after this many messages
+
 async function handleChat(message, apiKey, userMessage) {
-    const userId = message.author.id;
-    const historyKey = `${userId}-${message.channel.id}`;
+    // Use guildId as key - shared history for the whole server
+    const historyKey = message.guildId;
     const currentLogic = getLogic(message.guildId);
 
     // Default system prompt
@@ -222,9 +224,59 @@ async function handleChat(message, apiKey, userMessage) {
     ];
 
     // Try to load from database first, then memory, then default
-    let history = await loadHistory(historyKey);
+    let history = loadHistory(historyKey);
     if (!history) {
-        history = chatHistory.get(historyKey) || defaultHistory;
+        history = chatHistory.get(historyKey) || [...defaultHistory];
+    }
+
+    // Check if we need to summarize (excluding system prompt which is 2 messages)
+    const chatMessages = history.length - 2;
+    if (chatMessages >= SUMMARIZE_THRESHOLD) {
+        console.log(`[Chat] Summarizing ${chatMessages} messages for ${historyKey}`);
+
+        try {
+            // Create summary of previous conversation
+            const conversationText = history.slice(2).map(m => {
+                const role = m.role === 'user' ? 'User' : 'Rusdi';
+                return `${role}: ${m.parts[0].text}`;
+            }).join('\n');
+
+            const summaryPrompt = `Ringkas percakapan berikut dalam 2-3 kalimat singkat, fokus pada topik utama dan konteks penting yang perlu diingat. Jangan gunakan bullet points, cukup paragraf singkat.
+
+Percakapan:
+${conversationText}
+
+Ringkasan:`;
+
+            let summary;
+            if (currentLogic === 'deepseek') {
+                summary = await generateWithOpenRouter(summaryPrompt, []);
+            } else {
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+                const result = await model.generateContent(summaryPrompt);
+                summary = result.response.text().trim();
+            }
+
+            // Reset history with summary as context
+            history = [
+                ...defaultHistory,
+                {
+                    role: "user",
+                    parts: [{ text: `[Konteks percakapan sebelumnya: ${summary}]` }]
+                },
+                {
+                    role: "model",
+                    parts: [{ text: "oke lur, aku masih inget percakapan kita tadi. lanjut aja~" }]
+                }
+            ];
+
+            console.log(`[Chat] Summary created: ${summary.substring(0, 100)}...`);
+        } catch (e) {
+            console.error('[Chat] Summarization failed:', e.message);
+            // Fallback: just keep last 10 messages
+            history = [...defaultHistory, ...history.slice(-10)];
+        }
     }
 
     // Generate Response based on current logic
@@ -235,16 +287,14 @@ async function handleChat(message, apiKey, userMessage) {
         responseText = await generateWithGemini(apiKey, userMessage, null, history);
     }
 
+    // Check for empty response
+    if (!responseText || responseText.trim() === '') {
+        responseText = '🤔 Hmm, aku gak tau harus ngomong apa lur...';
+    }
+
     // Update History
-    // Gemini History Format: { role: 'user'|'model', parts: [{ text: '...' }] }
     history.push({ role: "user", parts: [{ text: userMessage }] });
     history.push({ role: "model", parts: [{ text: responseText }] });
-
-    // Limit to 100 messages (keep system prompt at index 0-1, then last 98 messages)
-    const MAX_HISTORY = 100;
-    if (history.length > MAX_HISTORY) {
-        history = [history[0], history[1], ...history.slice(-(MAX_HISTORY - 2))];
-    }
 
     // Save to memory and database
     chatHistory.set(historyKey, history);
@@ -253,6 +303,7 @@ async function handleChat(message, apiKey, userMessage) {
     // Reply
     await message.reply(responseText);
 }
+
 
 // --- LOGIC: PP ROASTING ---
 async function handleRoasting(message, apiKey) {

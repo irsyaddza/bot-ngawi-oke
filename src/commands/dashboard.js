@@ -13,7 +13,8 @@ module.exports = {
                     { name: '🖥️ System', value: 'system' },
                     { name: '🤖 Gemini AI', value: 'gemini' },
                     { name: '🟢 Deepseek (OpenRouter)', value: 'openrouter' },
-                    { name: '🎙️ ElevenLabs', value: 'elevenlabs' }
+                    { name: '🎙️ ElevenLabs', value: 'elevenlabs' },
+                    { name: '🎬 EmbedEZ', value: 'embedez' }
                 )
         ),
 
@@ -31,6 +32,8 @@ module.exports = {
                 await showOpenRouterDashboard(interaction);
             } else if (provider === 'elevenlabs') {
                 await showElevenLabsDashboard(interaction);
+            } else if (provider === 'embedez') {
+                await showEmbedEZDashboard(interaction);
             }
         } catch (error) {
             console.error('Dashboard error:', error);
@@ -385,3 +388,40 @@ function capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+async function showEmbedEZDashboard(interaction) {
+    const apiKey = process.env.EMBEDEZ_API_KEY;
+
+    if (!apiKey) {
+        return interaction.editReply({
+            content: '❌ `EMBEDEZ_API_KEY` tidak ditemukan di `.env`!'
+        });
+    }
+
+    // Note: EmbedEZ doesn't have a public API for usage stats
+    // We show a link to their dashboard instead
+    const embed = new EmbedBuilder()
+        .setColor('#00FF88')
+        .setTitle('🎬 EmbedEZ Dashboard')
+        .setDescription('API untuk embed TikTok, Twitter, Reddit, dll di Discord')
+        .addFields(
+            {
+                name: '📊 Usage Stats',
+                value: 'Cek usage di web dashboard',
+                inline: true
+            },
+            {
+                name: '🔗 Platform Support',
+                value: 'TikTok, Twitter/X, Reddit, Snapchat, Imgur, Bilibili, Weibo',
+                inline: false
+            },
+            {
+                name: '📈 Dashboard',
+                value: '[Buka EmbedEZ Dashboard](https://embedez.com/profile/dashboard)',
+                inline: false
+            }
+        )
+        .setFooter({ text: 'Data usage: Cek di website embedez.com' })
+        .setTimestamp();
+
+    await interaction.editReply({ embeds: [embed] });
+}

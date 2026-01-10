@@ -16,6 +16,40 @@ if (process.platform === 'win32') {
 
 console.log(`[Download] Platform: ${process.platform}, yt-dlp path: ${ytDlpPath}`);
 
+// Check if URL is TikTok
+function isTikTokUrl(url) {
+    return url.includes('tiktok.com');
+}
+
+// Fetch video from EmbedEZ API
+async function fetchFromEmbedEZ(url) {
+    const apiKey = process.env.EMBEDEZ_API_KEY;
+    if (!apiKey) {
+        throw new Error('EMBEDEZ_API_KEY not set in .env');
+    }
+
+    const apiUrl = `https://embedez.com/api/v1/providers/combined?q=${encodeURIComponent(url)}`;
+
+    const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`EmbedEZ API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+        throw new Error(data.message || 'EmbedEZ API failed');
+    }
+
+    return data.data;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('dl')
@@ -36,6 +70,54 @@ module.exports = {
         const audioOnly = interaction.options.getBoolean('audio') || false;
 
         await interaction.deferReply();
+
+        // TikTok: Use EmbedEZ API for direct video embed
+        if (isTikTokUrl(url) && !audioOnly) {
+            try {
+                const data = await fetchFromEmbedEZ(url);
+
+                // Get info from response
+                let embedLink = data.content?.link;
+                const title = data.content?.title || data.content?.description || '';
+                const username = data.user?.displayName || data.user?.name || 'Unknown';
+                const views = data.content?.statistics?.views || 0;
+                const likes = data.content?.statistics?.likes || 0;
+
+                if (!embedLink) {
+                    throw new Error('No embed link found in response');
+                }
+
+                // Convert tiktok.com to d.tiktokez.com for Discord embed
+                embedLink = embedLink
+                    .replace('https://www.tiktok.com', 'https://d.tiktokez.com')
+                    .replace('https://tiktok.com', 'https://d.tiktokez.com')
+                    .replace('https://vm.tiktok.com', 'https://d.tiktokez.com');
+
+                // Format caption as plain text (no embed = video embed tetep jalan)
+                const truncatedTitle = title.length > 150 ? title.substring(0, 150) + '...' : title;
+                const statsText = `👁 ${views.toLocaleString()} • ❤️ ${likes.toLocaleString()}`;
+
+                // Combine: link + newline + caption info
+                const content = `${embedLink}\n\n**@${username}**\n${truncatedTitle}\n-# ${statsText}`;
+
+                const row = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setLabel('🔗 Original')
+                        .setStyle(ButtonStyle.Link)
+                        .setURL(url)
+                );
+
+                await interaction.editReply({
+                    content: content,
+                    components: [row]
+                });
+                return;
+
+            } catch (error) {
+                console.error('EmbedEZ error:', error);
+                // Fallback to normal download below
+            }
+        }
 
         // Create temp directory if doesn't exist
         const tempDir = path.join(__dirname, '../../temp');
@@ -80,9 +162,8 @@ module.exports = {
             const stats = fs.statSync(filePath);
             const sizeInMB = stats.size / (1024 * 1024);
 
-            // Check file size (Discord webhook limit is ~8MB, regular bot is 25MB)
+            // Check file size (Discord webhook limit is ~8MB)
             if (sizeInMB > 8) {
-                // Clean up
                 fs.unlinkSync(filePath);
                 throw new Error(`File terlalu besar (${sizeInMB.toFixed(1)}MB). Max 8MB untuk upload Discord.`);
             }
@@ -154,7 +235,7 @@ module.exports = {
             } else if (errorMsg.includes('Video unavailable')) {
                 errorMsg = 'Video tidak tersedia atau sudah dihapus.';
             } else if (errorMsg.includes('filesize')) {
-                errorMsg = 'Video terlalu besar (max 25MB).';
+                errorMsg = 'Video terlalu besar (max 8MB).';
             }
 
             await interaction.editReply({

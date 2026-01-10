@@ -172,4 +172,14 @@ client.once('ready', () => {
     }, 5000);
 });
 
+// Global error handlers to prevent crash
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[Unhandled Rejection]:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('[Uncaught Exception]:', error);
+});
+
 client.login(process.env.DISCORD_TOKEN);
+

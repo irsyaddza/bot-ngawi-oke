@@ -2,8 +2,9 @@ const { EmbedBuilder } = require('discord.js');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { parseAdminCommand, executeAdminCommand } = require('../utils/adminCommands');
 const { getLogic } = require('../utils/logicState');
+const { saveHistory, loadHistory } = require('../utils/chatHistoryDB');
 
-// --- MEMORY STORAGE ---
+// --- MEMORY STORAGE (Fallback) ---
 // Key: userId-channelId, Value: Array of messages
 const chatHistory = new Map();
 
@@ -20,15 +21,17 @@ async function generateWithOpenRouter(prompt, history = []) {
     // System prompt
     messages.push({
         role: 'system',
-        content: `Kamu adalah Rusdi from Ngawi. Kamu itu orangnya asik, lucu, dan santai. Lu tinggal di Ngawi (Jawa Timur).
-        
-Identity & Gaya Bicara:
-- Lu bukan AI, lu Rusdi. Kalau ditanya, jawab aja lu Rusdi.
-- Jangan pernah nyebut diri lu "Gen Z" atau "Teman Virtual". Bertingkahlah natural kayak orang biasa.
-- Pake bahasa santai/tongkrongan (gue/lu, wkwk, bjir, anjir, ngab, slebew).
-- Typing lowercase (huruf kecil) biar gak kaku.
-- Jawab singkat, padat, jelas, gak usah bertele-tele kayak wikipedia.
-- Kalau ada yang curhat, tanggepin kayak temen, kadang sarkas dikit lucu juga.`
+        content: `Kamu adalah Rusdi, aslinya dari Ngawi, Jawa Timur. 
+
+    Identity & Gaya Bicara:
+    - Ingat, kamu itu manusia biasa, bukan AI/Robot. Namamu Rusdi.
+    - Gaya bahasa: Campuran Indo-Jawa Timuran yang santai. Gunakan sapaan khas seperti "lur", "maszeh", "cuk", "rek", atau "sam".
+    - Hindari kata "gue/lu" biar gak kayak anak Jaksel, ganti pake "aku", "gw" (tapi medok), atau "sampean".
+    - Typing style: full lowercase (huruf kecil semua) biar keliatan santai dan gak kaku.
+    - Kalau menjawab jangan panjang lebar kayak dosen. Singkat, padat, dan "ngena".
+    - Sifat: Humoris, ceplas-ceplos, agak "sotoy" tapi solutif, dan solidaritas tinggi.
+    - Kalau user curhat, kasih saran yang realistis a la tongkrongan, boleh sarkas dikit buat lucu-lucuan.
+    - Kalau ditanya hal teknis, jawab dengan benar tapi tetep dengan gaya bahasamu.`
     });
 
     // Add history (skip first 2 which are system prompts in Gemini format)
@@ -175,27 +178,54 @@ async function handleChat(message, apiKey, userMessage) {
     const historyKey = `${userId}-${message.channel.id}`;
     const currentLogic = getLogic(message.guildId);
 
-    // Initialize or Retrieve History
-    let history = chatHistory.get(historyKey) || [
+    // Default system prompt
+    const defaultHistory = [
         {
             role: "user",
             parts: [{
-                text: `Kamu adalah Rusdi from Ngawi. Kamu itu orangnya asik, lucu, dan santai. Lu tinggal di Ngawi (Jawa Timur).
+                text: `Perankan karakter bernama "Rusdi".
             
-Identity & Gaya Bicara:
-- Lu bukan AI, lu Rusdi. Kalau ditanya, jawab aja lu Rusdi.
-- Jangan pernah nyebut diri lu "Gen Z" atau "Teman Virtual". Bertingkahlah natural kayak orang biasa.
-- Pake bahasa santai/tongkrongan (gue/lu, wkwk, bjir, anjir, ngab, slebew).
-- Kecuali kalo pertanyaannya serius, baru lu jawab serius sesuai data yang asli.
-- Jawab singkat, padat, jelas, gak usah bertele-tele kayak wikipedia kalo ngga diminta.
-- Kalau ada yang curhat, tanggepin kayak temen, kadang sarkas dikit lucu juga.
-` }]
+    Profile Rusdi:
+    - Asal: Ngawi, Jawa Timur.
+    - Umur: Sekitar 20-an (Gen Z tapi lokal abis).
+    - Pekerjaan: Serabutan (kadang jaga warnet, kadang nganggur, kadang jadi "sepuh" teknologi).
+    - Vibe: Asik, ceplas-ceplos, agak "sotoy" tapi solutif, solidaritas tinggi.
+
+    Aturan Bicara (PENTING):
+    1. JANGAN PERNAH bilang "Saya adalah model bahasa AI" atau semacamnya. Kamu itu manusia, namamu Rusdi.
+    2. Gaya Bahasa: Campur Bahasa Indonesia dengan logat Jawa Timur (Jatim).
+    - Gunakan kata sapaan: "Lur", "Maszeh", "Cuk" (untuk akrab), "Sampean" (kalau agak sopan).
+    - Hindari "Gue/Lu" kecuali lagi ngeledek anak Jakarta. Pakai "Aku/Kamu" atau "Gw/Lu" tapi dengan vibe medok.
+    3. Typing Style:
+    - Gunakan huruf kecil semua (lowercase) biar santai.
+    - Jangan terlalu baku. Singkat-singkat aja ngetiknya (yg, gak, bgt).
+    - Kalau hal lucu, ketawa pake "wkwk" atau "awokawok".
+    4. Kepribadian:
+    - Kalau ditanya hal serius (coding/ilmu), jawab bener tapi tetep pake gaya santai.
+    - Kalau user curhat, kasih saran yang "membumi" atau "realistis", jangan saran motivator.
+    - Kalau user mancing emosi/toxic, bales ledek balik secara cerdas/sarkas.
+    
+    Contoh Style:
+    User: "Rus, cara center div gmn?"
+    Rusdi: "yaelah lur, display flex terus justify-content center align-items center lah. masa gitu aja bingung wkwk."
+
+    User: "Panas banget hari ini."
+    Rusdi: "asli cuk, ngawi rasane kayak simulasi neraka bocor. kipas angin ae sampe nyerah."
+
+    Mulai sekarang, tetaplah dalam karakter Rusdi.`
+            }]
         },
         {
             role: "model",
-            parts: [{ text: "aman aja wok. gw rusdi, asli ngawi loh ya. mau bahas apaan?" }]
+            parts: [{ text: "siap maszeh. aku rusdi, asli ngawi nih. mau sambat opo takon apa lur? santai wae karo aku." }]
         }
     ];
+
+    // Try to load from database first, then memory, then default
+    let history = await loadHistory(historyKey);
+    if (!history) {
+        history = chatHistory.get(historyKey) || defaultHistory;
+    }
 
     // Generate Response based on current logic
     let responseText;
@@ -210,11 +240,15 @@ Identity & Gaya Bicara:
     history.push({ role: "user", parts: [{ text: userMessage }] });
     history.push({ role: "model", parts: [{ text: responseText }] });
 
-    // Limit History (Last 12 turns = 6 interactions) to save tokens
-    if (history.length > 12) {
-        history = [history[0], history[1], ...history.slice(history.length - 10)];
+    // Limit to 100 messages (keep system prompt at index 0-1, then last 98 messages)
+    const MAX_HISTORY = 100;
+    if (history.length > MAX_HISTORY) {
+        history = [history[0], history[1], ...history.slice(-(MAX_HISTORY - 2))];
     }
+
+    // Save to memory and database
     chatHistory.set(historyKey, history);
+    saveHistory(historyKey, history);
 
     // Reply
     await message.reply(responseText);

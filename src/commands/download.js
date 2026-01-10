@@ -46,12 +46,12 @@ module.exports = {
         const outputFile = path.join(tempDir, `dl_${interaction.id}`);
 
         try {
-            // Build yt-dlp command
+            // Build yt-dlp command (8MB limit for Discord webhook)
             let command;
             if (audioOnly) {
-                command = `"${ytDlpPath}" -x --audio-format mp3 -o "${outputFile}.%(ext)s" --no-playlist --max-filesize 25M "${url}"`;
+                command = `"${ytDlpPath}" -x --audio-format mp3 -o "${outputFile}.%(ext)s" --no-playlist --max-filesize 8M "${url}"`;
             } else {
-                command = `"${ytDlpPath}" -f "bestvideo[filesize<25M]+bestaudio/best[filesize<25M]/best" --merge-output-format mp4 -o "${outputFile}.%(ext)s" --no-playlist "${url}"`;
+                command = `"${ytDlpPath}" -f "bestvideo[filesize<8M]+bestaudio/best[filesize<8M]/best" --merge-output-format mp4 -o "${outputFile}.%(ext)s" --no-playlist "${url}"`;
             }
 
             // Get video info first
@@ -80,11 +80,11 @@ module.exports = {
             const stats = fs.statSync(filePath);
             const sizeInMB = stats.size / (1024 * 1024);
 
-            // Check file size
-            if (sizeInMB > 25) {
+            // Check file size (Discord webhook limit is ~8MB, regular bot is 25MB)
+            if (sizeInMB > 8) {
                 // Clean up
                 fs.unlinkSync(filePath);
-                throw new Error(`File terlalu besar (${sizeInMB.toFixed(1)}MB). Max 25MB.`);
+                throw new Error(`File terlalu besar (${sizeInMB.toFixed(1)}MB). Max 8MB untuk upload Discord.`);
             }
 
             // Create attachment

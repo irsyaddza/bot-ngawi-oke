@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const os = require('os');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,6 +10,7 @@ module.exports = {
                 .setDescription('Pilih provider API')
                 .setRequired(true)
                 .addChoices(
+                    { name: '🖥️ System', value: 'system' },
                     { name: '🤖 Gemini AI', value: 'gemini' },
                     { name: '🟢 Deepseek (OpenRouter)', value: 'openrouter' },
                     { name: '🎙️ ElevenLabs', value: 'elevenlabs' }
@@ -21,7 +23,9 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         try {
-            if (provider === 'gemini') {
+            if (provider === 'system') {
+                await showSystemDashboard(interaction);
+            } else if (provider === 'gemini') {
                 await showGeminiDashboard(interaction);
             } else if (provider === 'openrouter') {
                 await showOpenRouterDashboard(interaction);
@@ -281,6 +285,91 @@ async function showElevenLabsDashboard(interaction) {
     await interaction.editReply({ embeds: [embed] });
 }
 
+// System Dashboard - Bot & Server Stats
+async function showSystemDashboard(interaction) {
+    const client = interaction.client;
+
+    // Uptime
+    const botUptime = process.uptime();
+    const days = Math.floor(botUptime / 86400);
+    const hours = Math.floor((botUptime % 86400) / 3600);
+    const minutes = Math.floor((botUptime % 3600) / 60);
+    const seconds = Math.floor(botUptime % 60);
+    const uptimeStr = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+    // Memory
+    const memUsage = process.memoryUsage();
+    const heapUsed = (memUsage.heapUsed / 1024 / 1024).toFixed(2);
+    const heapTotal = (memUsage.heapTotal / 1024 / 1024).toFixed(2);
+    const rss = (memUsage.rss / 1024 / 1024).toFixed(2);
+    const memPercent = ((memUsage.heapUsed / memUsage.heapTotal) * 100).toFixed(1);
+
+    // System Memory
+    const totalMem = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
+    const freeMem = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
+    const usedMem = (totalMem - freeMem).toFixed(2);
+    const sysMemPercent = ((usedMem / totalMem) * 100).toFixed(1);
+
+    // CPU
+    const cpus = os.cpus();
+    const cpuModel = cpus[0]?.model || 'Unknown';
+    const cpuCores = cpus.length;
+
+    // Bot Stats
+    const serverCount = client.guilds.cache.size;
+    const userCount = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+    const channelCount = client.channels.cache.size;
+
+    // Ping
+    const ping = client.ws.ping;
+
+    const embed = new EmbedBuilder()
+        .setColor('#00FF88')
+        .setTitle('🖥️ System Dashboard')
+        .setDescription(`Bot running on **Node.js ${process.version}**`)
+        .addFields(
+            {
+                name: '⏱️ Uptime',
+                value: `\`${uptimeStr}\``,
+                inline: true
+            },
+            {
+                name: '📡 Latency',
+                value: `\`${ping}ms\``,
+                inline: true
+            },
+            {
+                name: '🌐 Platform',
+                value: `\`${os.platform()} ${os.arch()}\``,
+                inline: true
+            },
+            {
+                name: '💾 Bot Memory',
+                value: `${createProgressBar(parseFloat(memPercent))} ${memPercent}%\nHeap: \`${heapUsed}/${heapTotal} MB\`\nRSS: \`${rss} MB\``,
+                inline: false
+            },
+            {
+                name: '🖥️ Server Memory',
+                value: `${createProgressBar(parseFloat(sysMemPercent))} ${sysMemPercent}%\nUsed: \`${usedMem}/${totalMem} GB\``,
+                inline: false
+            },
+            {
+                name: '⚡ CPU',
+                value: `\`${cpuModel}\`\nCores: \`${cpuCores}\``,
+                inline: false
+            },
+            {
+                name: '📊 Bot Stats',
+                value: `🏠 Servers: \`${serverCount}\`\n👥 Users: \`${userCount.toLocaleString()}\`\n📺 Channels: \`${channelCount}\``,
+                inline: false
+            }
+        )
+        .setFooter({ text: `Hostname: ${os.hostname()}` })
+        .setTimestamp();
+
+    await interaction.editReply({ embeds: [embed] });
+}
+
 // Helper: Create progress bar
 function createProgressBar(percent) {
     const filled = Math.round(percent / 10);
@@ -295,3 +384,4 @@ function createProgressBar(percent) {
 function capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+

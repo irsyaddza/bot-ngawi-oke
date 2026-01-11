@@ -7,6 +7,7 @@
 [![Kazagumo](https://img.shields.io/badge/Kazagumo-9B59B6?style=for-the-badge&logo=musicbrainz&logoColor=white)](https://github.com/Takiyo0/Kazagumo)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
+[![Open-Meteo](https://img.shields.io/badge/Open--Meteo-00a8ff?style=for-the-badge&logo=cloudfoundry&logoColor=white)](https://open-meteo.com/)
 
 **Fun discord bot**  
 
@@ -88,6 +89,13 @@ Pantau aktivitas server secara real-time:
 | **/logiccheck** | Cek AI mana yang lagi aktif. |
 | **/chatdb** | Lihat statistik database chat history. |
 | **/clearchat** | Hapus semua chat history AI dari database. |
+
+### 🌦️ Weather
+| Command | Apa gunanya? |
+| :--- | :--- |
+| **/weather now** `[wilayah]` | Cek cuaca sekarang (semua user). |
+| **/weather set** `[channel]` `[wilayah]` `[jam]` | Set update cuaca harian (admin). |
+| **/weather stop** | Stop update cuaca harian (admin). |
 
 ---
 

@@ -68,6 +68,10 @@ client.once('ready', () => {
     // Initialize Lavalink Music Manager
     client.kazagumo = initMusicManager(client);
 
+    // Initialize Weather Scheduler
+    const { startWeatherScheduler } = require('./src/utils/weatherScheduler');
+    startWeatherScheduler(client);
+
     // Kazagumo Player Events
     client.kazagumo.on('playerStart', (player, track) => {
         const embed = new EmbedBuilder()

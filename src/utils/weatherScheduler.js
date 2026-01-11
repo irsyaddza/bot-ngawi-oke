@@ -2,6 +2,7 @@
 const cron = require('node-cron');
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 const { getWeather, formatWeatherMessage } = require('./weatherService');
 const { EmbedBuilder } = require('discord.js');
 
@@ -13,7 +14,14 @@ let db = null;
 function initWeatherDB() {
     if (db) return db;
 
-    const dbPath = path.join(__dirname, '../../data/weather.db');
+    const dataDir = path.join(__dirname, '../../data');
+    const dbPath = path.join(dataDir, 'weather.db');
+
+    // Ensure data directory exists
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+    }
+
     db = new Database(dbPath);
 
     db.exec(`

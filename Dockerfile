@@ -25,6 +25,9 @@ RUN apt-get update && apt-get install -y \
 # Create app directory
 WORKDIR /app
 
+# Create data directory for SQLite databases
+RUN mkdir -p /app/data
+
 # Copy package files
 COPY package*.json ./
 

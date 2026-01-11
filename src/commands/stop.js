@@ -7,7 +7,7 @@ module.exports = {
 
     async execute(interaction) {
         const voiceChannel = interaction.member.voice.channel;
-        const queue = interaction.client.distube.getQueue(interaction.guildId);
+        const player = interaction.client.kazagumo?.players.get(interaction.guildId);
 
         if (!voiceChannel) {
             return interaction.reply({
@@ -20,7 +20,7 @@ module.exports = {
             });
         }
 
-        if (!queue) {
+        if (!player) {
             return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
@@ -32,8 +32,8 @@ module.exports = {
         }
 
         try {
-            await queue.stop();
-            queue.voice.leave(); // Disconnect from voice channel
+            // Stop and destroy player (clears queue and disconnects)
+            player.destroy();
 
             await interaction.reply({
                 embeds: [

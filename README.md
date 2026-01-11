@@ -125,6 +125,28 @@ Pantau aktivitas server secara real-time:
 
 ---
 
+## 🐳 Docker Deployment (Optional)
+
+Mau deploy pake Docker? Gampang:
+
+1. **Pastiin Docker Desktop running**
+2. **Build dan jalanin:**
+   ```bash
+   docker-compose up --build -d
+   ```
+3. **Lihat logs:**
+   ```bash
+   docker-compose logs -f
+   ```
+4. **Stop:**
+   ```bash
+   docker-compose down
+   ```
+
+> **Tip:** Build pertama agak lama (~5 menit) karena install ffmpeg + dependencies. Build selanjutnya lebih cepat karena Docker cache.
+
+---
+
 ## 📦 Tech Stack & Library
 
 <div align="center">

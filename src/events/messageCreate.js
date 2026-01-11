@@ -360,7 +360,12 @@ Ringkasan:`;
         responseText = await generateWithGemini(apiKey, userMessage, null, history);
     }
 
-    // Check for empty response
+    // Retry sekali kalo empty
+    if (!responseText || responseText.trim() === '') {
+        console.log('[Chat] Empty response, retrying...');
+        responseText = await generateWithGemini(apiKey, userMessage + '\n\n(Tolong jawab pertanyaan di atas)', null, history);
+    }
+    // Fallback kalo masih kosong
     if (!responseText || responseText.trim() === '') {
         responseText = '🤔 Hmm, aku gak tau harus ngomong apa lur...';
     }

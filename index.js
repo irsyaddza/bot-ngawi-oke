@@ -72,6 +72,12 @@ client.once('ready', () => {
     const { startWeatherScheduler } = require('./src/utils/weatherScheduler');
     startWeatherScheduler(client);
 
+    // Initialize Analytics Tracker and Scheduler
+    const { initAnalyticsTracker } = require('./src/utils/analyticsTracker');
+    const { startAnalyticsScheduler } = require('./src/utils/analyticsScheduler');
+    initAnalyticsTracker(client);
+    startAnalyticsScheduler(client);
+
     // Kazagumo Player Events
     client.kazagumo.on('playerStart', (player, track) => {
         const embed = new EmbedBuilder()

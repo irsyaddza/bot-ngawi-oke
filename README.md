@@ -97,6 +97,15 @@ Pantau aktivitas server secara real-time:
 | **/weather set** `[channel]` `[wilayah]` `[jam]` | Set update cuaca harian (admin). |
 | **/weather stop** | Stop update cuaca harian (admin). |
 
+### 📊 Analytics
+| Command | Apa gunanya? |
+| :--- | :--- |
+| **/analytics setup** `[channel]` | Setup weekly report (admin). |
+| **/analytics stats** | Lihat stats pribadi minggu ini. |
+| **/analytics leaderboard** | Top 10 member paling aktif. |
+| **/analytics report** | Generate report sekarang (admin). |
+| **/analytics stop** | Stop weekly report (admin). |
+
 ---
 
 ## 🚀 Cara Setup (Buat yang Berani)

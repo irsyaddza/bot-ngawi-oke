@@ -1,5 +1,17 @@
 const { Events, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 
+// Helper function to format duration
+function formatDuration(ms) {
+    if (!ms) return '0:00';
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+
+    if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
 module.exports = {
     name: Events.InteractionCreate,
     execute: async (interaction) => {
@@ -95,7 +107,7 @@ module.exports = {
 
         // Handle Music Button Interactions
         if (interaction.isButton() && interaction.customId.startsWith('music_')) {
-            const queue = interaction.client.distube.getQueue(interaction.guildId);
+            const player = interaction.client.kazagumo?.players.get(interaction.guildId);
             const voiceChannel = interaction.member.voice.channel;
 
             if (!voiceChannel) {
@@ -105,7 +117,7 @@ module.exports = {
                 });
             }
 
-            if (!queue) {
+            if (!player || !player.queue.current) {
                 return interaction.reply({
                     embeds: [new EmbedBuilder().setColor('Red').setDescription('❌ There is nothing playing!')],
                     ephemeral: true
@@ -117,28 +129,29 @@ module.exports = {
 
                 switch (action) {
                     case 'previous':
-                        if (queue.previousSongs.length === 0) {
+                        if (!player.queue.previous) {
                             return interaction.reply({
                                 embeds: [new EmbedBuilder().setColor('Red').setDescription('❌ No previous song!')],
                                 ephemeral: true
                             });
                         }
-                        await queue.previous();
+                        // Kazagumo doesn't have built-in previous, skip back by replaying current track
+                        player.seek(0);
                         await interaction.reply({
-                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription('⏮️ Playing previous song!')],
+                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription('⏮️ Restarted current song!')],
                             ephemeral: true
                         });
                         break;
 
                     case 'pause':
-                        if (queue.paused) {
-                            await queue.resume();
+                        if (player.paused) {
+                            player.pause(false);
                             await interaction.reply({
                                 embeds: [new EmbedBuilder().setColor('#00ff88').setDescription('▶️ Resumed!')],
                                 ephemeral: true
                             });
                         } else {
-                            await queue.pause();
+                            player.pause(true);
                             await interaction.reply({
                                 embeds: [new EmbedBuilder().setColor('#ffaa00').setDescription('⏸️ Paused!')],
                                 ephemeral: true
@@ -147,14 +160,14 @@ module.exports = {
                         break;
 
                     case 'skip':
-                        if (queue.songs.length <= 1) {
-                            await queue.stop();
+                        if (player.queue.length === 0) {
+                            player.destroy();
                             await interaction.reply({
                                 embeds: [new EmbedBuilder().setColor('#a200ff').setDescription('⏭️ Skipped! Queue is now empty.')],
                                 ephemeral: true
                             });
                         } else {
-                            await queue.skip();
+                            player.skip();
                             await interaction.reply({
                                 embeds: [new EmbedBuilder().setColor('#a200ff').setDescription('⏭️ Skipped to next song!')],
                                 ephemeral: true
@@ -163,7 +176,7 @@ module.exports = {
                         break;
 
                     case 'stop':
-                        await queue.stop();
+                        player.destroy();
                         await interaction.reply({
                             embeds: [new EmbedBuilder().setColor('Red').setDescription('⏹️ Stopped and cleared the queue!')],
                             ephemeral: true
@@ -171,7 +184,7 @@ module.exports = {
                         break;
 
                     case 'shuffle':
-                        await queue.shuffle();
+                        player.queue.shuffle();
                         await interaction.reply({
                             embeds: [new EmbedBuilder().setColor('#a200ff').setDescription('🔀 Queue shuffled!')],
                             ephemeral: true
@@ -180,53 +193,39 @@ module.exports = {
 
                     case 'repeat':
                         const modes = ['Off', 'Track', 'Queue'];
-                        const newMode = queue.repeatMode === 2 ? 0 : queue.repeatMode + 1;
-                        await queue.setRepeatMode(newMode);
+                        const newMode = player.loop === 'none' ? 'track' : player.loop === 'track' ? 'queue' : 'none';
+                        player.setLoop(newMode);
+                        const modeText = newMode === 'none' ? 'Off' : newMode === 'track' ? 'Track' : 'Queue';
                         await interaction.reply({
-                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription(`🔁 Repeat mode: **${modes[newMode]}**`)],
+                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription(`🔁 Repeat mode: **${modeText}**`)],
                             ephemeral: true
                         });
                         break;
 
                     case 'voldown':
-                        const newVolDown = Math.max(0, queue.volume - 10);
-                        await queue.setVolume(newVolDown);
-                        await interaction.reply({
-                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription(`🔉 Volume: **${newVolDown}%**`)],
-                            ephemeral: true
-                        });
-                        break;
-
                     case 'volup':
-                        const newVolUp = Math.min(150, queue.volume + 10);
-                        await queue.setVolume(newVolUp);
+                        // Volume controls disabled - Kazagumo uses different volume format
                         await interaction.reply({
-                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription(`🔊 Volume: **${newVolUp}%**`)],
-                            ephemeral: true
-                        });
-                        break;
-
-                    case 'autoplay':
-                        const autoplayState = queue.toggleAutoplay();
-                        await interaction.reply({
-                            embeds: [new EmbedBuilder().setColor('#a200ff').setDescription(`📻 Autoplay: **${autoplayState ? 'On' : 'Off'}**`)],
+                            embeds: [new EmbedBuilder().setColor('#ffaa00').setDescription('⚠️ Volume controls are currently disabled.')],
                             ephemeral: true
                         });
                         break;
 
                     case 'queue':
-                        const songs = queue.songs;
-                        const currentSong = songs[0];
+                        const currentTrack = player.queue.current;
+                        const tracks = Array.from(player.queue);
                         let queueList = '';
-                        for (let i = 1; i < Math.min(songs.length, 6); i++) {
-                            queueList += `**${i}.** ${songs[i].name} - \`${songs[i].formattedDuration}\`\n`;
+
+                        for (let i = 0; i < Math.min(tracks.length, 5); i++) {
+                            const dur = formatDuration(tracks[i].length);
+                            queueList += `**${i + 1}.** ${tracks[i].title} - \`${dur}\`\n`;
                         }
-                        if (songs.length > 6) queueList += `...and **${songs.length - 6}** more`;
+                        if (tracks.length > 5) queueList += `...and **${tracks.length - 5}** more`;
 
                         const queueEmbed = new EmbedBuilder()
                             .setColor('#a200ff')
                             .setTitle('📜 Queue')
-                            .setDescription(`**Now Playing:**\n🎶 ${currentSong.name}\n\n${queueList || 'No songs in queue'}`);
+                            .setDescription(`**Now Playing:**\n🎶 ${currentTrack.title}\n\n${queueList || 'No songs in queue'}`);
 
                         await interaction.reply({ embeds: [queueEmbed], ephemeral: true });
                         break;
@@ -241,58 +240,7 @@ module.exports = {
             return;
         }
 
-        // Handle Music Filter Select Menu (Volume presets for DisTube v5 compatibility)
-        if (interaction.isStringSelectMenu() && interaction.customId === 'music_filter') {
-            const queue = interaction.client.distube.getQueue(interaction.guildId);
-            const voiceChannel = interaction.member.voice.channel;
-
-            if (!voiceChannel) {
-                return interaction.reply({
-                    embeds: [new EmbedBuilder().setColor('Red').setDescription('❌ You must be in a voice channel!')],
-                    ephemeral: true
-                });
-            }
-
-            if (!queue) {
-                return interaction.reply({
-                    embeds: [new EmbedBuilder().setColor('Red').setDescription('❌ There is nothing playing!')],
-                    ephemeral: true
-                });
-            }
-
-            try {
-                const preset = interaction.values[0];
-
-                // Volume presets instead of filters (DisTube v5 filter API changed)
-                const presets = {
-                    'clear': { vol: 100, name: 'Normal' },
-                    'bassboost': { vol: 120, name: 'Bass Boost (120%)' },
-                    'nightcore': { vol: 100, name: 'Nightcore (Note: speed filters require FFmpeg)' },
-                    'vaporwave': { vol: 80, name: 'Vaporwave (80%)' },
-                    '8d': { vol: 100, name: '8D Audio (Note: requires FFmpeg filter)' },
-                    'karaoke': { vol: 100, name: 'Karaoke (Note: requires FFmpeg filter)' },
-                    'earrape': { vol: 150, name: 'Earrape (150%)' },
-                    'treble': { vol: 110, name: 'Treble Boost (110%)' },
-                    'flanger': { vol: 100, name: 'Flanger (Note: requires FFmpeg filter)' },
-                    'tremolo': { vol: 100, name: 'Tremolo (Note: requires FFmpeg filter)' }
-                };
-
-                const selected = presets[preset] || presets['clear'];
-                await queue.setVolume(selected.vol);
-
-                await interaction.reply({
-                    embeds: [new EmbedBuilder().setColor('#a200ff').setDescription(`🎛️ Applied: **${selected.name}**\nVolume set to **${selected.vol}%**`)],
-                    ephemeral: true
-                });
-            } catch (error) {
-                console.error('Preset error:', error);
-                await interaction.reply({
-                    embeds: [new EmbedBuilder().setColor('Red').setDescription(`❌ Error: ${error.message}`)],
-                    ephemeral: true
-                });
-            }
-            return;
-        }
+        // Music filter select menu removed (DisTube-specific feature)
 
         // Handle Modal Submissions
         if (interaction.isModalSubmit()) {

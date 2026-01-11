@@ -77,7 +77,7 @@ Pantau aktivitas server secara real-time:
 | Command | Apa gunanya? |
 | :--- | :--- |
 | **/giverole** / **/takerole** | Atur role member gak pake ribet. |
-| **/send** `[channel]` | Kirim pesan lewat bot ke channel lain. |
+| **/send** `[channel]` `[gambar]` | Kirim pesan + gambar lewat bot ke channel lain. |
 | **/voicelock** | Lock/Unlock voice channel + whitelist. |
 | **/auditlog** | Setting channel untuk audit log server. |
 
@@ -103,15 +103,28 @@ Pantau aktivitas server secara real-time:
     ```bash
     npm install
     ```
-4.  **Isi `.env`**:
+4.  **Isi `.env`** (copy dari `.env.example` kalo ada, atau bikin manual):
     ```env
-    DISCORD_TOKEN=
-    CLIENT_ID=
-    GUILD_ID=
-    ELEVENLABS_API_KEY=
-    GEMINI_API_KEY=
-    OPENROUTER_API_KEY=
+    # === Discord Bot ===
+    DISCORD_TOKEN=token_bot_dari_discord_developer_portal
+    CLIENT_ID=client_id_bot_untuk_register_commands
+    GUILD_ID=id_server_discord_untuk_deploy_commands
+
+    # === AI Services ===
+    GEMINI_API_KEY=api_key_dari_google_ai_studio
+    OPENROUTER_API_KEY=api_key_dari_openrouter_untuk_deepseek
+
+    # === Voice/TTS ===
+    ELEVENLABS_API_KEY=api_key_dari_elevenlabs_untuk_tts_premium
     ```
+    
+    **Cara dapetin:**
+    - `DISCORD_TOKEN` & `CLIENT_ID`: [Discord Developer Portal](https://discord.com/developers/applications) → Bot → Token & Application ID
+    - `GUILD_ID`: Enable Developer Mode di Discord → Klik kanan server → Copy Server ID
+    - `GEMINI_API_KEY`: [Google AI Studio](https://aistudio.google.com/apikey)
+    - `OPENROUTER_API_KEY`: [OpenRouter](https://openrouter.ai/keys)
+    - `ELEVENLABS_API_KEY`: [ElevenLabs](https://elevenlabs.io/)
+
 5.  **Daftarin Command**:
     ```bash
     npm run deploy

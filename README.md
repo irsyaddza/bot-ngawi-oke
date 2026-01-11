@@ -53,6 +53,14 @@ Pantau aktivitas server secara real-time:
 - **Member Events**: Join, Leave, Ban, Unban.
 - **Mod Tracking**: Tau siapa yang nge-kick/ban/mute.
 
+### 📊 Server Analytics
+Weekly report server activity dengan AI-powered insights:
+- **Message Tracking**: Track semua pesan per user.
+- **Voice Tracking**: Hitung durasi voice chat per user.
+- **AI Roasts**: Komentar lucu untuk top members (powered by Gemini/DeepSeek).
+- **Visual Charts**: Grafik aktivitas harian via QuickChart.io.
+- **Scheduled Reports**: Auto-post weekly report ke channel pilihan.
+
 ---
 
 ## 🛠️ Daftar Command
@@ -100,11 +108,14 @@ Pantau aktivitas server secara real-time:
 ### 📊 Analytics
 | Command | Apa gunanya? |
 | :--- | :--- |
-| **/analytics setup** `[channel]` | Setup weekly report (admin). |
-| **/analytics stats** | Lihat stats pribadi minggu ini. |
+| **/analytics setup** `[channel]` | Setup weekly report ke channel (admin). |
+| **/analytics stats** | Lihat statistik pribadi minggu ini. |
 | **/analytics leaderboard** | Top 10 member paling aktif. |
-| **/analytics report** | Generate report sekarang (admin). |
-| **/analytics stop** | Stop weekly report (admin). |
+| **/analytics report** | Generate weekly report sekarang (admin). |
+| **/analytics stop** | Hentikan weekly report (admin). |
+| **/analytics test seed** | Generate dummy data untuk testing (admin). |
+| **/analytics test clear** | Hapus semua data analytics (admin). |
+| **/analytics test preview** | Preview report tanpa post ke channel (admin). |
 
 ---
 

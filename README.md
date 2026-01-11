@@ -3,8 +3,8 @@
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.js.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![DisTube](https://img.shields.io/badge/DisTube-FF0000?style=for-the-badge&logo=discogs&logoColor=white)](https://distube.js.org/)
-[![yt-dlp](https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://github.com/yt-dlp/yt-dlp)
+[![Lavalink](https://img.shields.io/badge/Lavalink-FF5555?style=for-the-badge&logo=java&logoColor=white)](https://lavalink.dev/)
+[![Kazagumo](https://img.shields.io/badge/Kazagumo-9B59B6?style=for-the-badge&logo=musicbrainz&logoColor=white)](https://github.com/Takiyo0/Kazagumo)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
 
@@ -20,11 +20,12 @@ Mau nyomot video dari mana aja? Gas!
 - **Smart Embed**: Tampilan bersih, ada tombol "source"
 - **Audio Only**: Bisa convert video jadi MP3 juga kalau cuma butuh suaranya.
 
-### 🎵 Music System (Powered by DisTube)
+### 🎵 Music System (Powered by Lavalink)
 Bosen sepi? Rusdi bisa nyetel lagu dari mana aja:
 - **Multi-Platform Support**: YouTube, Spotify, SoundCloud.
-- **Interactive Controls**: Gak perlu ngetik terus, tinggal klik tombol-tombol cakep buat Skip, Volume, Pause, dll.
-- **Volume Presets**: Ada menu preset buat ngatur volume cepet (Normal, Bass Boost, dll).
+- **Lavalink Backend**: Audio streaming via Lavalink server - lebih stabil dan reliable.
+- **Interactive Controls**: Gak perlu ngetik terus, tinggal klik tombol-tombol cakep buat Skip, Pause, Shuffle, dll.
+- **Queue System**: Add, shuffle, repeat, dan manage playlist dengan mudah.
 
 ### 🎙️ Voice & TTS (Text-to-Speech)
 Ngobrol tanpa mic? Bisa banget:
@@ -39,13 +40,13 @@ Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini & DeepSeek:
 - **Server Info**: Cek kondisi server lewat chat biasa.
 - **Moderator**: Rusdi bisa nge-kick, ban, mute, atau hapus pesan kalo disuruh (asal ada izin).
 
-### 🔒 Voice Lock (Baru!)
+### 🔒 Voice Lock
 Kunci voice channel biar gak sembarang orang join:
 - **Whitelist System**: Pilih user/role yang boleh join.
 - **Smart Block**: User yang gak berhak auto di-kick tanpa ganggu yang udah di dalem.
 - **Persistent**: Konfigurasi tetap aman meski bot restart.
 
-### 📋 Audit Log (Baru!)
+### 📋 Audit Log
 Pantau aktivitas server secara real-time:
 - **Voice Events**: Join, Leave, Mute, Deafen, Kick.
 - **Member Events**: Join, Leave, Ban, Unban.
@@ -59,7 +60,7 @@ Pantau aktivitas server secara real-time:
 | Command | Apa gunanya? |
 | :--- | :--- |
 | **/dl** `[url]` | Download video dari TikTok, FB, IG, YT, dll. |
-| **/dashboard** | Cek system statusGemini/ElevenLabs/OpenRouter. |
+| **/dashboard** | Cek system status Gemini/ElevenLabs/OpenRouter. |
 | **/ping** | Cek seberapa lemot bot merespon (latency). |
 
 ### 🔊 Music & Voice
@@ -86,24 +87,23 @@ Pantau aktivitas server secara real-time:
 | **/logic** | Switch AI antara Gemini dan DeepSeek. |
 | **/logiccheck** | Cek AI mana yang lagi aktif. |
 | **/chatdb** | Lihat statistik database chat history. |
+| **/clearchat** | Hapus semua chat history AI dari database. |
 
 ---
 
 ## 🚀 Cara Setup (Buat yang Berani)
 
-1.  **Install Node.js** (Minimal v16.9.0, tapi v18+ lebih mantap).
+1.  **Install Node.js** (Minimal v18+, recommended v22).
 2.  **Clone repo** ini:
     ```bash
     git clone https://github.com/irsyaddza/bot-ngawi-oke.git
     cd bot-ngawi-oke
     ```
-3.  **Install alat tempurnya**:
+3.  **Install dependencies**:
     ```bash
     npm install
-    # ffmpeg & yt-dlp udah dapet di dalem, gak perlu install manual.
     ```
 4.  **Isi `.env`**:
-    Pake file `.env` dan masukin token-token sakti lu:
     ```env
     DISCORD_TOKEN=
     CLIENT_ID=
@@ -121,14 +121,17 @@ Pantau aktivitas server secara real-time:
     npm start
     ```
 
+> **Note**: Music system pake public Lavalink nodes. Kalo mau pake Lavalink server sendiri, edit config di `src/utils/lavalinkManager.js`.
+
 ---
 
 ## 📦 Tech Stack & Library
 
 <div align="center">
   <img src="https://img.shields.io/badge/Discord.js-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord.js" />
-  <img src="https://img.shields.io/badge/DisTube-FF0000?style=for-the-badge&logo=discogs&logoColor=white" alt="DisTube" />
-  <img src="https://img.shields.io/badge/yt--dlp-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="yt-dlp" />
+  <img src="https://img.shields.io/badge/Lavalink-FF5555?style=for-the-badge&logo=java&logoColor=white" alt="Lavalink" />
+  <img src="https://img.shields.io/badge/Kazagumo-9B59B6?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Kazagumo" />
+  <img src="https://img.shields.io/badge/Shoukaku-3498DB?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Shoukaku" />
   <img src="https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify" />
   <img src="https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
   <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />

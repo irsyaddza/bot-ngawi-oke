@@ -125,7 +125,7 @@ async function handleRoastUser(message, apiKey, target) {
     const prompt = `Kamu adalah Rusdi, temannya Dreamybull. Buatkan roasting kasar dan toxic untuk seseorang bernama "${target.username}". 
 Roasting harus:
 - Kasar dan Toxic bahasa inggris ataupun indonesia
-- Menggunakan bahasa Indonesia campur Inggris juga boleh, contoh ngen*ot, fuckin, goblok, tolol, bengak, kampang,
+- Menggunakan bahasa Indonesia campur Inggris juga boleh, contoh ngen*ot, fuck, goblok, tolol, bengak, kampang,
 - Max 2-3 kalimat
 - Bisa sindir nama/username-nya`;
 
@@ -164,9 +164,14 @@ module.exports = {
         // Check if bot is mentioned
         if (!message.mentions.has(message.client.user)) return;
 
-        // Clean content (Remove mention)
-        const mentionRegex = new RegExp(`^<@!?${message.client.user.id}>( )?`);
+        // Clean content (Remove mention from anywhere in the message)
+        const mentionRegex = new RegExp(`<@!?${message.client.user.id}>( )?`, 'g');
         const cleanedContent = message.content.replace(mentionRegex, '').trim();
+
+        // DEBUG: Check what's being parsed
+        console.log('[DEBUG] Raw content:', message.content);
+        console.log('[DEBUG] Bot ID:', message.client.user.id);
+        console.log('[DEBUG] Cleaned content:', cleanedContent);
 
         if (!cleanedContent) return; // Ignore if only mention
 

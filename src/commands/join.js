@@ -33,7 +33,7 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         try {
-            // Destroy any existing voice connection first (including DisTube's)
+            // Destroy any existing voice connection first (including Kazagumo's)
             const existingConnection = getVoiceConnection(interaction.guild.id);
             if (existingConnection) {
                 existingConnection.destroy();
@@ -41,15 +41,15 @@ module.exports = {
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
 
-            // Also try to stop DisTube queue if exists
-            const queue = interaction.client.distube?.getQueue(interaction.guildId);
-            if (queue) {
+            // Also destroy Kazagumo player if exists
+            const player = interaction.client.kazagumo?.players.get(interaction.guildId);
+            if (player) {
                 try {
-                    await queue.stop();
+                    player.destroy();
                 } catch (e) {
-                    // Ignore if already stopped
+                    // Ignore if already destroyed
                 }
-                // Wait for DisTube to cleanup
+                // Wait for Kazagumo to cleanup
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
 

@@ -1,17 +1,23 @@
-require('dotenv').config();
+const config = require('./src/config');
 const { Client, GatewayIntentBits, Collection, ActivityType, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-// DisTube imports
-const { DisTube } = require('distube');
-const { SpotifyPlugin } = require('@distube/spotify');
-const { SoundCloudPlugin } = require('@distube/soundcloud');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
+// Lavalink/Kazagumo Music Manager
+const { initMusicManager } = require('./src/utils/lavalinkManager');
 
-// Set ffmpeg path for DisTube
-const ffmpegPath = require('ffmpeg-static');
-process.env.FFMPEG_PATH = ffmpegPath;
+// Helper function to format duration
+function formatDuration(ms) {
+    if (!ms) return '0:00';
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+
+    if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
 
 const client = new Client({
     intents: [
@@ -26,92 +32,8 @@ const client = new Client({
 
 client.commands = new Collection();
 
-// DisTube Setup
-client.distube = new DisTube(client, {
-    ffmpeg: {
-        path: ffmpegPath
-    },
-    plugins: [
-        new SpotifyPlugin(),
-        new SoundCloudPlugin(),
-        new YtDlpPlugin({ update: false })
-    ]
-});
-
-// Helper function to get queue status
-const getStatus = queue =>
-    `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Repeat: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Track') : 'Off'}\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
-
-// DisTube Event Handlers
-client.distube
-    .on('playSong', (queue, song) => {
-        const embed = new EmbedBuilder()
-            .setColor('#a200ff')
-            .setTitle('🎶 Now Playing')
-            .setDescription(`**[${song.name}](${song.url})**`)
-            .addFields(
-                { name: '⏱️ Duration', value: song.formattedDuration, inline: true },
-                { name: '👤 Requested by', value: `${song.user}`, inline: true },
-                { name: '🔊 Volume', value: `${queue.volume}%`, inline: true }
-            )
-            .setThumbnail(song.thumbnail)
-            .setFooter({ text: getStatus(queue) });
-
-        queue.textChannel.send({ embeds: [embed] });
-    })
-    .on('addSong', (queue, song) => {
-        const embed = new EmbedBuilder()
-            .setColor('#00ff88')
-            .setDescription(`✅ Added **[${song.name}](${song.url})** - \`${song.formattedDuration}\` to the queue\nRequested by: ${song.user}`);
-
-        queue.textChannel.send({ embeds: [embed] });
-    })
-    .on('addList', (queue, playlist) => {
-        const embed = new EmbedBuilder()
-            .setColor('#00ff88')
-            .setDescription(`✅ Added **${playlist.name}** playlist\n\`${playlist.songs.length}\` songs added to queue\n${getStatus(queue)}`);
-
-        queue.textChannel.send({ embeds: [embed] });
-    })
-    .on('error', (channel, e) => {
-        if (channel) {
-            const embed = new EmbedBuilder()
-                .setColor('Red')
-                .setDescription(`⛔ Error: ${e.toString().slice(0, 1974)}`);
-            channel.send({ embeds: [embed] });
-        } else {
-            console.error(e);
-        }
-    })
-    .on('empty', channel => {
-        const embed = new EmbedBuilder()
-            .setColor('Red')
-            .setDescription('⛔ Voice channel is empty! Leaving...');
-        channel.send({ embeds: [embed] });
-    })
-    .on('searchNoResult', (message, query) => {
-        const embed = new EmbedBuilder()
-            .setColor('Red')
-            .setDescription(`⛔ No results found for: \`${query}\``);
-        message.channel.send({ embeds: [embed] });
-    })
-    .on('finish', async queue => {
-        const embed = new EmbedBuilder()
-            .setColor('#a200ff')
-            .setDescription('🏁 Queue finished! Thanks for listening.\n\n💡 Use `/join` to re-enable voice features.');
-        queue.textChannel.send({ embeds: [embed] });
-
-        // Clear stored voice channel if any
-        const guildId = queue.textChannel.guildId;
-        const client = queue.textChannel.client;
-        if (client.musicVoiceChannel?.has(guildId)) {
-            client.musicVoiceChannel.delete(guildId);
-        }
-    });
-
-// Event Handling
+// Event Handling (load before ready to register handlers)
 const eventsPath = path.join(__dirname, 'src/events');
-// Ensure directory exists to prevent crash if empty
 if (fs.existsSync(eventsPath)) {
     const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
@@ -126,7 +48,7 @@ if (fs.existsSync(eventsPath)) {
     }
 }
 
-// Command Handling (Basic Loader)
+// Command Handling
 const commandsPath = path.join(__dirname, 'src/commands');
 if (fs.existsSync(commandsPath)) {
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -137,19 +59,85 @@ if (fs.existsSync(commandsPath)) {
             client.commands.set(command.data.name, command);
         }
     }
-
 }
 
+// Initialize Kazagumo when client is ready
 client.once('ready', () => {
     console.log(`Ready! Logged in as ${client.user.tag}`);
 
+    // Initialize Lavalink Music Manager
+    client.kazagumo = initMusicManager(client);
+
+    // Initialize Weather Scheduler
+    const { startWeatherScheduler } = require('./src/utils/weatherScheduler');
+    startWeatherScheduler(client);
+
+    // Initialize Analytics Tracker and Scheduler
+    const { initAnalyticsTracker } = require('./src/utils/analyticsTracker');
+    const { startAnalyticsScheduler } = require('./src/utils/analyticsScheduler');
+    initAnalyticsTracker(client);
+    startAnalyticsScheduler(client);
+
+    // Kazagumo Player Events
+    client.kazagumo.on('playerStart', (player, track) => {
+        const embed = new EmbedBuilder()
+            .setColor('#a200ff')
+            .setTitle('🎶 Now Playing')
+            .setDescription(`**[${track.title}](${track.uri})**`)
+            .addFields(
+                { name: '⏱️ Duration', value: formatDuration(track.length), inline: true },
+                { name: '👤 Author', value: track.author || 'Unknown', inline: true },
+                { name: '🎵 Source', value: track.sourceName || 'Unknown', inline: true }
+            )
+            .setThumbnail(track.thumbnail || null);
+
+        const channel = client.channels.cache.get(player.textId);
+        if (channel) channel.send({ embeds: [embed] });
+    });
+
+    client.kazagumo.on('playerEnd', (player) => {
+        // Queue continues automatically
+    });
+
+    client.kazagumo.on('playerEmpty', (player) => {
+        const embed = new EmbedBuilder()
+            .setColor('#a200ff')
+            .setDescription('🏁 Queue finished! Thanks for listening.\n\n💡 Use `/join` to re-enable voice features.');
+
+        const channel = client.channels.cache.get(player.textId);
+        if (channel) channel.send({ embeds: [embed] });
+
+        player.destroy();
+    });
+
+    client.kazagumo.on('playerError', (player, error) => {
+        console.error('[Player Error]:', error);
+        const channel = client.channels.cache.get(player.textId);
+        if (channel) {
+            const embed = new EmbedBuilder()
+                .setColor('Red')
+                .setDescription(`⛔ Player Error: ${error.message || error}`);
+            channel.send({ embeds: [embed] });
+        }
+    });
+
+    client.kazagumo.on('playerResolveError', (player, track, message) => {
+        console.error('[Resolve Error]:', message);
+        const channel = client.channels.cache.get(player.textId);
+        if (channel) {
+            const embed = new EmbedBuilder()
+                .setColor('Red')
+                .setDescription(`⛔ Could not resolve track: ${track.title}\n${message || ''}`);
+            channel.send({ embeds: [embed] });
+        }
+    });
+
+    // Rotating Status
     let i = 0;
     setInterval(() => {
-        // Dynamic Status Logic
         const activities = [];
 
-        // 1. Voice Channel Status
-        // Find if bot is in any voice channel
+        // Voice Channel Status
         let voiceStatus = 'Not in Voice 🔇';
         client.guilds.cache.forEach(guild => {
             const me = guild.members.me;
@@ -159,9 +147,7 @@ client.once('ready', () => {
         });
         activities.push({ name: voiceStatus, type: ActivityType.Listening });
 
-
-
-        // 3. Static/Fun Statuses
+        // Static/Fun Statuses
         activities.push({ name: 'No Surprises - Radiohead', type: ActivityType.Listening });
         activities.push({ name: 'Your Dih', type: ActivityType.Playing });
 
@@ -172,7 +158,7 @@ client.once('ready', () => {
     }, 5000);
 });
 
-// Global error handlers to prevent crash
+// Global error handlers
 process.on('unhandledRejection', (reason, promise) => {
     console.error('[Unhandled Rejection]:', reason);
 });
@@ -181,5 +167,11 @@ process.on('uncaughtException', (error) => {
     console.error('[Uncaught Exception]:', error);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+if (!config.token) {
+    console.error('CRITICAL: Token is missing. Please check your .env file.');
+    process.exit(1);
+}
 
+// Log startup environment
+console.log(`[Startup] Running in ${config.env} mode`);
+client.login(config.token);

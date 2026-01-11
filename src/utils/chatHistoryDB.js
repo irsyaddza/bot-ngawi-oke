@@ -110,6 +110,25 @@ function clearHistory(historyKey) {
 }
 
 /**
+ * Clear ALL chat history (delete all rows)
+ * @returns {number} Number of deleted rows
+ */
+function clearAllHistory() {
+    try {
+        initDB();
+        if (!db) return 0;
+
+        const stmt = db.prepare('DELETE FROM chat_history');
+        const result = stmt.run();
+        console.log(`[ChatDB] Cleared all history: ${result.changes} rows deleted`);
+        return result.changes;
+    } catch (error) {
+        console.error('[ChatDB] ClearAll error:', error);
+        return 0;
+    }
+}
+
+/**
  * Get all history keys (for debugging/admin)
  * @returns {Array} List of all history entries
  */
@@ -131,5 +150,6 @@ module.exports = {
     saveHistory,
     loadHistory,
     clearHistory,
+    clearAllHistory,
     getAllKeys
 };

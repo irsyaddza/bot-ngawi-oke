@@ -229,6 +229,108 @@ module.exports = {
 
                         await interaction.reply({ embeds: [queueEmbed], ephemeral: true });
                         break;
+
+                    case 'lyrics':
+                        const lyricTrack = player.queue.current;
+                        if (!lyricTrack) {
+                            return interaction.reply({
+                                embeds: [new EmbedBuilder().setColor('Red').setDescription('❌ No track currently playing!')],
+                                ephemeral: true
+                            });
+                        }
+
+                        await interaction.deferReply({ ephemeral: true });
+
+                        try {
+                            // Clean up the title - remove common suffixes like (Official Video), [HD], etc.
+                            let cleanTitle = lyricTrack.title
+                                .replace(/\(Official.*?\)/gi, '')
+                                .replace(/\[Official.*?\]/gi, '')
+                                .replace(/\(Lyric.*?\)/gi, '')
+                                .replace(/\[Lyric.*?\]/gi, '')
+                                .replace(/\(Audio.*?\)/gi, '')
+                                .replace(/\[Audio.*?\]/gi, '')
+                                .replace(/\(Music Video\)/gi, '')
+                                .replace(/\[HD\]/gi, '')
+                                .replace(/\[4K\]/gi, '')
+                                .replace(/\(feat\..*?\)/gi, '')
+                                .replace(/\[feat\..*?\]/gi, '')
+                                .trim();
+
+                            let lyrics = null;
+                            let source = 'Unknown';
+
+                            // Try Lrclib API first
+                            try {
+                                const searchQuery = encodeURIComponent(`${lyricTrack.author || ''} ${cleanTitle}`.trim());
+                                const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${searchQuery}`, {
+                                    headers: {
+                                        'User-Agent': 'RusdiBot/1.0 (https://github.com/irsyaddza/bot-ngawi-oke)'
+                                    }
+                                });
+
+                                if (lrclibResponse.ok) {
+                                    const lrclibData = await lrclibResponse.json();
+                                    if (lrclibData && lrclibData.length > 0) {
+                                        // Get plain lyrics (not synced) from first result
+                                        lyrics = lrclibData[0].plainLyrics || lrclibData[0].syncedLyrics?.replace(/\[\d+:\d+\.\d+\]/g, '').trim();
+                                        source = 'LRCLIB';
+                                    }
+                                }
+                            } catch (lrclibErr) {
+                                console.log('[Lyrics] Lrclib failed, trying fallback:', lrclibErr.message);
+                            }
+
+                            // Fallback to lyrics-finder if Lrclib didn't work
+                            if (!lyrics) {
+                                try {
+                                    const lyricsFinder = require('lyrics-finder');
+                                    lyrics = await lyricsFinder(lyricTrack.author || '', cleanTitle);
+                                    if (lyrics && lyrics !== 'Not Found!' && lyrics.trim() !== '') {
+                                        source = 'Google';
+                                    } else {
+                                        lyrics = null;
+                                    }
+                                } catch (fallbackErr) {
+                                    console.log('[Lyrics] Fallback also failed:', fallbackErr.message);
+                                }
+                            }
+
+                            if (!lyrics || lyrics.trim() === '') {
+                                return interaction.editReply({
+                                    embeds: [
+                                        new EmbedBuilder()
+                                            .setColor('#ffaa00')
+                                            .setTitle(`🎤 Lyrics: ${lyricTrack.title}`)
+                                            .setDescription('❌ Lyrics not found for this track.\n\nTry searching manually on [Genius](https://genius.com) or [AZLyrics](https://azlyrics.com)')
+                                    ]
+                                });
+                            }
+
+                            // Truncate if too long (Discord embed limit is 4096)
+                            let displayLyrics = lyrics;
+                            if (lyrics.length > 3800) {
+                                displayLyrics = lyrics.substring(0, 3800) + '\n\n... *[Lyrics truncated]*';
+                            }
+
+                            const lyricsEmbed = new EmbedBuilder()
+                                .setColor('#a200ff')
+                                .setTitle(`🎤 Lyrics: ${lyricTrack.title}`)
+                                .setDescription(displayLyrics)
+                                .setFooter({ text: `Artist: ${lyricTrack.author || 'Unknown'} | Source: ${source}` });
+
+                            await interaction.editReply({ embeds: [lyricsEmbed] });
+                        } catch (lyricsError) {
+                            console.error('Lyrics fetch error:', lyricsError);
+                            await interaction.editReply({
+                                embeds: [
+                                    new EmbedBuilder()
+                                        .setColor('Red')
+                                        .setDescription(`❌ Failed to fetch lyrics: ${lyricsError.message}`)
+                                ]
+                            });
+                        }
+                        break;
                 }
             } catch (error) {
                 console.error('Music button error:', error);

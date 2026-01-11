@@ -163,6 +163,10 @@ module.exports = {
                     new ButtonBuilder()
                         .setCustomId('music_queue')
                         .setEmoji('📜')
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId('music_lyrics')
+                        .setEmoji('🎤')
                         .setStyle(ButtonStyle.Secondary)
                 );
 

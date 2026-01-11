@@ -1,4 +1,4 @@
-require('dotenv').config();
+const config = require('./src/config');
 const { Client, GatewayIntentBits, Collection, ActivityType, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -157,4 +157,11 @@ process.on('uncaughtException', (error) => {
     console.error('[Uncaught Exception]:', error);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+if (!config.token) {
+    console.error('CRITICAL: Token is missing. Please check your .env file.');
+    process.exit(1);
+}
+
+// Log startup environment
+console.log(`[Startup] Running in ${config.env} mode`);
+client.login(config.token);

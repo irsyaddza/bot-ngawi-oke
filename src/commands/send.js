@@ -13,14 +13,28 @@ module.exports = {
         .addStringOption(option =>
             option.setName('pesan')
                 .setDescription('Pesan yang ingin dikirim (bisa @mention user atau #channel)')
-                .setRequired(true)
+                .setRequired(false)
                 .setMaxLength(2000)
+        )
+        .addAttachmentOption(option =>
+            option.setName('gambar')
+                .setDescription('Upload gambar untuk dikirim bersama pesan')
+                .setRequired(false)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
     async execute(interaction) {
         const targetChannel = interaction.options.getChannel('channel');
         const message = interaction.options.getString('pesan');
+        const attachment = interaction.options.getAttachment('gambar');
+
+        // Check if at least message or attachment is provided
+        if (!message && !attachment) {
+            return interaction.reply({
+                content: '❌ Harus ada pesan atau gambar yang dikirim!',
+                ephemeral: true
+            });
+        }
 
         // Check if bot has permission to send messages in target channel
         const botPermissions = targetChannel.permissionsFor(interaction.client.user);
@@ -31,19 +45,31 @@ module.exports = {
             });
         }
 
+        // Check AttachFiles permission if sending attachment
+        if (attachment && !botPermissions.has(PermissionFlagsBits.AttachFiles)) {
+            return interaction.reply({
+                content: `❌ Bot tidak memiliki izin untuk mengirim file ke ${targetChannel}!`,
+                ephemeral: true
+            });
+        }
+
         try {
-            // Send the message to target channel
-            // Discord automatically parses @mentions and #channels from the string
-            await targetChannel.send({
-                content: message,
+            // Build message payload
+            const messagePayload = {
                 allowedMentions: {
                     parse: ['users', 'roles'],
                     repliedUser: false
                 }
-            });
+            };
+
+            if (message) messagePayload.content = message;
+            if (attachment) messagePayload.files = [attachment.url];
+
+            // Send the message to target channel
+            await targetChannel.send(messagePayload);
 
             await interaction.reply({
-                content: `✅ Pesan berhasil dikirim ke ${targetChannel}!`,
+                content: `✅ ${attachment ? 'Pesan + gambar' : 'Pesan'} berhasil dikirim ke ${targetChannel}!`,
                 ephemeral: true
             });
 

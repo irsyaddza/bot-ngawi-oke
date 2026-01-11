@@ -175,6 +175,18 @@ module.exports = {
 
         if (!cleanedContent) return; // Ignore if only mention
 
+        // === SEHAT CHECK (Fun Response) ===
+        if (cleanedContent.toLowerCase().includes('sehat')) {
+            const { AttachmentBuilder } = require('discord.js');
+            const path = require('path');
+            const imagePath = path.join(__dirname, '..', 'assets', 'sehat.jpg');
+            const attachment = new AttachmentBuilder(imagePath, { name: 'sehat.jpg' });
+            return message.reply({
+                content: 'gua sehat',
+                files: [attachment]
+            });
+        }
+
         // === ADMIN COMMAND CHECK (Priority) ===
         const adminCommand = parseAdminCommand(cleanedContent, message);
         if (adminCommand) {

@@ -9,19 +9,39 @@ export default function Hero() {
     const [stats, setStats] = useState({ stars: 124, forks: 45, commits: 890 }); // Mock start
 
     useEffect(() => {
-        // Fetch real GitHub stats
-        fetch('https://api.github.com/repos/irsyaddza/bot-ngawi-oke')
-            .then(res => res.json())
-            .then(data => {
-                if (data.stargazers_count) {
-                    setStats(prev => ({
-                        ...prev,
-                        stars: data.stargazers_count,
-                        forks: data.forks_count
-                    }));
+        const fetchStats = async () => {
+            try {
+                // Fetch Repo Details (Stars & Forks)
+                const repoRes = await fetch('https://api.github.com/repos/irsyaddza/bot-ngawi-oke');
+                const repoData = await repoRes.json();
+
+                // Fetch Commits Count (using headers trick)
+                const commitsRes = await fetch('https://api.github.com/repos/irsyaddza/bot-ngawi-oke/commits?per_page=1');
+                const linkHeader = commitsRes.headers.get('link');
+                let commitCount = 0;
+
+                if (linkHeader) {
+                    const match = linkHeader.match(/&page=(\d+)>; rel="last"/);
+                    if (match) {
+                        commitCount = parseInt(match[1]);
+                    }
+                } else {
+                    // Fallback if only 1 page or error, assume rudimentary count from array length if not paginated (which is 1)
+                    // But usually if no link header, it means < 1 page (so 1 commit) or API error.
+                    if (commitsRes.ok) commitCount = 1;
                 }
-            })
-            .catch(console.error);
+
+                setStats({
+                    stars: repoData.stargazers_count || 0,
+                    forks: repoData.forks_count || 0,
+                    commits: commitCount || 0
+                });
+            } catch (error) {
+                console.error('Failed to fetch GitHub stats:', error);
+            }
+        };
+
+        fetchStats();
     }, []);
 
     return (

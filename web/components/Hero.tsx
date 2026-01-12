@@ -168,9 +168,9 @@ export default function Hero() {
 
                     {/* Floating elements - Moved outside to prevent clipping */}
                     <motion.div
-                        animate={{ y: [0, -10, 0] }}
+                        animate={{ y: [0, -5, 0] }}
                         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -right-8 -bottom-8 p-4 bg-gray-900/90 backdrop-blur border border-white/10 rounded-lg shadow-xl z-20"
+                        className="absolute right-4 bottom-4 p-3 bg-gray-900/90 backdrop-blur border border-white/10 rounded-lg shadow-xl z-20"
                     >
                         <div className="flex items-center gap-2">
                             <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />

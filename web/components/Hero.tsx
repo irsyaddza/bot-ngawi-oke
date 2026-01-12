@@ -51,10 +51,13 @@ export default function Hero() {
     }, []);
 
     return (
-        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-background">
+        <section className="relative min-h-[90vh] flex flex-col justify-center pt-14 pb-12 lg:py-0 overflow-hidden bg-background">
             {/* Background Gradients */}
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-[128px] pointer-events-none" />
+
+            {/* Bottom Fade Gradient for Mobile Smoothness */}
+            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
 
             <div className="container px-4 mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
                 {/* Text Content */}

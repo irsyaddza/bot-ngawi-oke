@@ -18,6 +18,8 @@ const config = {
 // Validation
 if (!config.token) {
     console.warn(`[Config] ⚠️ Warning: Token is missing for environment: ${env}`);
+    // DEBUG: Print available keys to check if they are being loaded at all
+    console.log('[Config] Debug - Available ENV Keys:', Object.keys(process.env).filter(key => !key.startsWith('npm_')).join(', '));
 }
 
 module.exports = config;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Github, Heart, Twitter } from 'lucide-react';
+import { Github, Coffee, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -11,7 +11,7 @@ export default function Footer() {
 
                     {/* Brand / Copyright */}
                     <div className="text-center md:text-left">
-                        <div className="font-bold text-lg mb-1">Bot Ngawi Oke</div>
+                        <div className="font-bold text-lg mb-1">Rusdi Bot</div>
                         <p className="text-sm text-gray-400">
                             &copy; {new Date().getFullYear()} All rights reserved.
                         </p>
@@ -27,18 +27,18 @@ export default function Footer() {
                             <Github size={20} />
                         </Link>
                         <Link
-                            href="#"
+                            href="https://www.instagram.com/irsyaddza"
                             className="text-gray-400 hover:text-white transition-colors"
                         >
-                            <Twitter size={20} />
+                            <Instagram size={20} />
                         </Link>
                     </div>
 
                     {/* Made with love */}
                     <div className="flex items-center gap-2 text-sm text-gray-400">
                         <span>Made with</span>
-                        <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" />
-                        <span>by Irsyad & Team</span>
+                        <Coffee size={14} className="text-red-500 fill-red-500 animate-pulse" />
+                        <span>by Abidin & Antigravity</span>
                     </div>
                 </div>
             </div>

@@ -158,7 +158,7 @@ export default function Hero() {
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">3</span>
-                                <span className="ml-8 text-green-400">'Music_Lavalink',</span>
+                                <span className="ml-8 text-green-400">'Music_Player',</span>
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">4</span>
@@ -166,11 +166,11 @@ export default function Hero() {
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">5</span>
-                                <span className="ml-8 text-green-400">'Analytics_Charts',</span>
+                                <span className="ml-8 text-green-400">'Analytics_Server',</span>
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">6</span>
-                                <span className="ml-8 text-green-400">'Weather_Auto'</span>
+                                <span className="ml-8 text-green-400">'Weather_Forecast'</span>
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">7</span>
@@ -178,7 +178,7 @@ export default function Hero() {
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">8</span>
-                                <span className="ml-4">database: <span className="text-green-400">'SQLite_WAL'</span>,</span>
+                                <span className="ml-4">database: <span className="text-green-400">'SQLite'</span>,</span>
                             </div>
                             <div className="flex">
                                 <span className="w-6 text-gray-600 select-none">9</span>

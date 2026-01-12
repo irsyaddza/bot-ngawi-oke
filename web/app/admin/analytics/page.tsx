@@ -123,16 +123,18 @@ export default function AnalyticsPage() {
                             Daily Activity (Last 7 Days)
                         </h3>
                     </div>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data.daily}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                                <XAxis dataKey="day" stroke="#6b7280" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
-                                <YAxis stroke="#6b7280" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
-                                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
-                                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    <div className="w-full overflow-x-auto pb-2">
+                        <div className="h-[300px] min-w-[600px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={data.daily}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                    <XAxis dataKey="day" stroke="#6b7280" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
+                                    <YAxis stroke="#6b7280" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
+                                    <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </motion.div>
 
@@ -149,29 +151,31 @@ export default function AnalyticsPage() {
                             Hourly Trend (Communication Heatmap)
                         </h3>
                     </div>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data.hourly}>
-                                <defs>
-                                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                                <XAxis
-                                    dataKey="hour"
-                                    stroke="#6b7280"
-                                    tick={{ fill: '#6b7280' }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                    interval={3} // Show fewer ticks
-                                />
-                                <YAxis stroke="#6b7280" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="count" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCount)" strokeWidth={3} />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                    <div className="w-full overflow-x-auto pb-2">
+                        <div className="h-[300px] min-w-[600px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={data.hourly}>
+                                    <defs>
+                                        <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                    <XAxis
+                                        dataKey="hour"
+                                        stroke="#6b7280"
+                                        tick={{ fill: '#6b7280' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                        interval={3} // Show fewer ticks
+                                    />
+                                    <YAxis stroke="#6b7280" tick={{ fill: '#6b7280' }} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Area type="monotone" dataKey="count" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCount)" strokeWidth={3} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </motion.div>
             </div>
@@ -189,7 +193,46 @@ export default function AnalyticsPage() {
                         Top Active Users
                     </h3>
                 </div>
-                <div className="overflow-x-auto">
+                {/* Mobile List View */}
+                <div className="md:hidden">
+                    {data.topUsers.length > 0 ? (
+                        <div className="divide-y divide-white/5">
+                            {data.topUsers.map((user: any, i: number) => (
+                                <div key={user.user_id} className="p-4 flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className={`
+                                            flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs shrink-0
+                                            ${i === 0 ? 'bg-yellow-500/20 text-yellow-400' : ''}
+                                            ${i === 1 ? 'bg-gray-400/20 text-gray-300' : ''}
+                                            ${i === 2 ? 'bg-orange-500/20 text-orange-400' : ''}
+                                            ${i > 2 ? 'bg-white/5 text-gray-500' : ''}
+                                        `}>
+                                            {i + 1}
+                                        </div>
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className="font-medium text-gray-200 truncate max-w-[120px]">{user.user_id}</span>
+                                            <div className="w-24 bg-white/10 rounded-full h-1 mt-1.5">
+                                                <div
+                                                    className="bg-primary h-1 rounded-full"
+                                                    style={{ width: `${Math.min((user.count / (data.topUsers[0].count || 1)) * 100, 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <span className="block text-sm font-bold text-white">{user.count.toLocaleString()}</span>
+                                        <span className="text-xs text-gray-500">msgs</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center text-gray-500">No data available yet.</div>
+                    )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-white/5 text-gray-400">
                             <tr>

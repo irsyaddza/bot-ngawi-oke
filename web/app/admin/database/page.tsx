@@ -210,7 +210,7 @@ export default function DatabasePage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex space-x-2 border-b border-white/10 overflow-x-auto pb-1">
+            <div className="flex space-x-2 border-b border-white/10 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
@@ -371,7 +371,80 @@ export default function DatabasePage() {
                             </div>
                         </div>
 
-                        <div className="bg-card rounded-xl border border-white/5 overflow-hidden">
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-4">
+                            {loadingData ? (
+                                <div className="text-center py-12 text-gray-500">Loading data...</div>
+                            ) : dbData.length > 0 ? (
+                                dbData.map((row, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="bg-card p-4 rounded-xl border border-white/5 space-y-4"
+                                    >
+                                        <div className="flex justify-between items-start border-b border-white/5 pb-3">
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">ID / Key</span>
+                                                <span className="font-mono text-primary text-sm truncate max-w-[150px]" title={String(row[getPrimaryKey()])}>
+                                                    {String(row[getPrimaryKey()])}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEdit(row)}
+                                                    className="p-2 bg-blue-500/10 text-blue-400 rounded-lg"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(row)}
+                                                    disabled={deletingKey === String(row[getPrimaryKey()])}
+                                                    className="p-2 bg-red-500/10 text-red-400 rounded-lg"
+                                                >
+                                                    {deletingKey === String(row[getPrimaryKey()]) ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            {columns.filter(col => col !== getPrimaryKey()).map(col => {
+                                                const val = row[col];
+                                                let displayVal: React.ReactNode = String(val);
+
+                                                if (typeof val === 'object' && val !== null) {
+                                                    displayVal = JSON.stringify(val);
+                                                } else if (col.includes('time') || col.includes('at')) {
+                                                    // Simple heuristic for dates
+                                                    try {
+                                                        const timestamp = Number(val);
+                                                        const d = !isNaN(timestamp) && timestamp > 0 ? new Date(timestamp) : new Date(String(val));
+                                                        if (!isNaN(d.getTime())) {
+                                                            displayVal = d.toLocaleString('id-ID', {
+                                                                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                            });
+                                                        }
+                                                    } catch { }
+                                                }
+
+                                                return (
+                                                    <div key={col} className="flex flex-col">
+                                                        <span className="text-xs text-gray-500 capitalize">{col.replace('_', ' ')}</span>
+                                                        <span className="text-sm text-gray-200 break-words">{displayVal}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <div className="text-center py-12 text-gray-500">No records found.</div>
+                            )}
+                        </div>
+
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block bg-card rounded-xl border border-white/5 overflow-hidden">
                             <div className="overflow-x-auto max-h-[600px] overflow-y-auto global-scrollbar">
                                 <table className="w-full min-w-max text-sm text-left">
                                     <thead className="bg-[#111] text-gray-400 sticky top-0 backdrop-blur-sm z-10">

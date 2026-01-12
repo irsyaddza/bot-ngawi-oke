@@ -17,9 +17,13 @@ const config = {
 
 // Validation
 if (!config.token) {
-    console.warn(`[Config] ⚠️ Warning: Token is missing for environment: ${env}`);
-    // DEBUG: Print available keys to check if they are being loaded at all
-    console.log('[Config] Debug - Available ENV Keys:', Object.keys(process.env).filter(key => !key.startsWith('npm_')).join(', '));
+    console.warn(`[Config] ⚠️ Warning: Token is missing!`);
+    console.warn(`[Config] ℹ️ Environment detected: '${env}'`);
+    console.warn(`[Config] ℹ️ Looking for variable: '${env === 'development' ? 'DEV_DISCORD_TOKEN' : 'DISCORD_TOKEN'}'`);
+
+    // DEBUG: Print available keys (filtered)
+    const availableKeys = Object.keys(process.env).filter(key => !key.startsWith('npm_') && !key.startsWith('_'));
+    console.log('[Config] 🔍 Debug - Available ENV Keys in Container:', availableKeys.join(', '));
 }
 
 module.exports = config;

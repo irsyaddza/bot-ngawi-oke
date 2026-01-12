@@ -2,11 +2,27 @@ version: '3.8'
 
 services:
   bot:
-    build: .
+    build: ./bot
     container_name: rusdi-bot
     env_file:
-      - .env
+      - ./bot/.env
     volumes:
-      # Persist SQLite database
+      - ./data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data
+      - TZ=Asia/Jakarta
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    container_name: rusdi-web
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./bot/.env
+    environment:
+      - DATABASE_PATH=/app/data
+      - TZ=Asia/Jakarta
+    volumes:
       - ./data:/app/data
     restart: unless-stopped

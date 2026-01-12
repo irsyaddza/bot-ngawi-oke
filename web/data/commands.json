@@ -1,0 +1,112 @@
+[
+    {
+        "category": "Music",
+        "commands": [
+            {
+                "name": "/play",
+                "description": "Play a song from YouTube/Spotify/SoundCloud",
+                "usage": "/play <query_or_url>"
+            },
+            {
+                "name": "/stop",
+                "description": "Stop playback and clear queue",
+                "usage": "/stop"
+            },
+            {
+                "name": "/skip",
+                "description": "Skip the current song",
+                "usage": "/skip"
+            },
+            {
+                "name": "/queue",
+                "description": "Show the current music queue",
+                "usage": "/queue"
+            },
+            {
+                "name": "/lyrics",
+                "description": "Get lyrics for the current song",
+                "usage": "/lyrics"
+            }
+        ]
+    },
+    {
+        "category": "AI",
+        "commands": [
+            {
+                "name": "/chat",
+                "description": "Start a conversation with Gemini AI",
+                "usage": "/chat <message>"
+            },
+            {
+                "name": "/ask",
+                "description": "One-off question to DeepSeek R1",
+                "usage": "/ask <question>"
+            },
+            {
+                "name": "/imagine",
+                "description": "Generate image using AI",
+                "usage": "/imagine <prompt>"
+            }
+        ]
+    },
+    {
+        "category": "Weather",
+        "commands": [
+            {
+                "name": "/weather",
+                "description": "Check current weather for a location",
+                "usage": "/weather <city>"
+            },
+            {
+                "name": "/setweather",
+                "description": "Configure daily weather updates",
+                "usage": "/setweather <city> <channel>"
+            },
+            {
+                "name": "/weather-disable",
+                "description": "Disable scheduled updates",
+                "usage": "/weather-disable"
+            }
+        ]
+    },
+    {
+        "category": "Analytics",
+        "commands": [
+            {
+                "name": "/analytics",
+                "description": "View server activity stats",
+                "usage": "/analytics"
+            },
+            {
+                "name": "/leaderboard",
+                "description": "Show top active members",
+                "usage": "/leaderboard"
+            },
+            {
+                "name": "/voice-stats",
+                "description": "Show voice channel usage time",
+                "usage": "/voice-stats"
+            }
+        ]
+    },
+    {
+        "category": "Utility",
+        "commands": [
+            {
+                "name": "/ping",
+                "description": "Check bot latency",
+                "usage": "/ping"
+            },
+            {
+                "name": "/avatar",
+                "description": "Get user profile picture",
+                "usage": "/avatar [user]"
+            },
+            {
+                "name": "/siapo",
+                "description": "Check who is in a voice channel",
+                "usage": "/siapo"
+            }
+        ]
+    }
+]

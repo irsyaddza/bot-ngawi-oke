@@ -46,9 +46,16 @@ export async function GET(request: Request) {
             let columns: string[] = [];
 
             if (dbName === 'chat_history') {
-                const stmt = db.prepare('SELECT history_key, updated_at, length(messages) as msg_len FROM chat_history ORDER BY updated_at DESC LIMIT 50');
+                console.log(`[DEBUG] Reading Chat History from: ${dbPath}`);
+                if (fs.existsSync(dbPath)) {
+                    const stats = fs.statSync(dbPath);
+                    console.log(`[DEBUG] File Size: ${stats.size} bytes`);
+                }
+
+                const stmt = db.prepare('SELECT history_key, messages, updated_at FROM chat_history ORDER BY updated_at DESC LIMIT 50');
                 data = stmt.all();
-                columns = ['history_key', 'updated_at', 'msg_len'];
+                console.log(`[DEBUG] Chat History Rows Found: ${data.length}`);
+                columns = ['history_key', 'messages', 'updated_at'];
             } else if (dbName === 'weather') {
                 const stmt = db.prepare('SELECT * FROM weather_config');
                 data = stmt.all();

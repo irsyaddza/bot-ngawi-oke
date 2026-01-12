@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Download, Database, Check, AlertCircle, RefreshCw, Table as TableIcon, ChevronDown } from 'lucide-react';
+import { Download, Database, Check, AlertCircle, RefreshCw, Table as TableIcon, ChevronDown, Edit, Trash2, Plus, X, Save, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DatabasePage() {
@@ -17,6 +17,13 @@ export default function DatabasePage() {
     const [analyticsTable, setAnalyticsTable] = useState('analytics_messages');
     const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // CRUD State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+    const [editingRow, setEditingRow] = useState<any>({});
+    const [saving, setSaving] = useState(false);
+    const [deletingKey, setDeletingKey] = useState<string | null>(null);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -86,6 +93,101 @@ export default function DatabasePage() {
         }
     };
 
+    // --- CRUD OPERATIONS ---
+
+    const getTableContext = () => {
+        if (activeTab === 'analytics') return analyticsTable;
+        return activeTab === 'weather' ? 'weather_config' : 'chat_history'; // chat_history db has table 'chat_history'
+    };
+
+    const getPrimaryKey = () => {
+        const table = getTableContext();
+        if (table === 'weather_config' || table === 'analytics_config') return 'guild_id';
+        if (table === 'chat_history') return 'history_key';
+        return 'id';
+    };
+
+    const handleEdit = (row: any) => {
+        setModalMode('edit');
+        setEditingRow({ ...row }); // Clone to avoid mutation
+        setIsModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setModalMode('create');
+        // Initialize empty row based on columns
+        const newRow: any = {};
+        columns.forEach(col => newRow[col] = '');
+        setEditingRow(newRow);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (row: any) => {
+        const pk = getPrimaryKey();
+        const key = row[pk];
+
+        if (!confirm(`Are you sure you want to delete this record? (${key})`)) return;
+
+        setDeletingKey(String(key));
+        try {
+            const res = await fetch('/api/admin/database/edit', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    db: activeTab,
+                    table: getTableContext(),
+                    key: key
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                fetchData(); // Refresh
+            } else {
+                alert('Delete failed: ' + json.error);
+            }
+        } catch (e: any) {
+            alert('Delete Error: ' + e.message);
+        } finally {
+            setDeletingKey(null);
+        }
+    };
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const pk = getPrimaryKey();
+            const method = modalMode === 'create' ? 'POST' : 'PUT';
+
+            // Format data if needed (e.g. JSON strings)
+            const submissionData = { ...editingRow };
+
+            const res = await fetch('/api/admin/database/edit', {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    db: activeTab,
+                    table: getTableContext(),
+                    data: submissionData,
+                    key: modalMode === 'edit' ? editingRow[pk] : undefined
+                })
+            });
+
+            const json = await res.json();
+            if (json.success) {
+                setIsModalOpen(false);
+                fetchData();
+            } else {
+                alert('Save failed: ' + json.error);
+            }
+        } catch (e: any) {
+            alert('Save Error: ' + e.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+
     const tabs = [
         { id: 'backup', label: 'Backup & Restore', icon: Database },
         { id: 'chat_history', label: 'Chat History', icon: TableIcon },
@@ -104,7 +206,7 @@ export default function DatabasePage() {
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold">Database Management</h1>
-                <p className="text-gray-400 mt-2">Manage backups and view database contents.</p>
+                <p className="text-gray-400 mt-2">Manage backups, view, and edit database contents.</p>
             </div>
 
             {/* Tabs */}
@@ -171,6 +273,7 @@ export default function DatabasePage() {
                         exit={{ opacity: 0, y: -10 }}
                         className="space-y-4"
                     >
+                        {/* Header & Controls */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-4 rounded-xl border border-white/5 relative z-10">
                             <div className="flex items-center justify-between w-full sm:w-auto gap-4">
                                 <h2 className="text-lg font-semibold flex items-center gap-2 py-1">
@@ -179,13 +282,22 @@ export default function DatabasePage() {
                                 </h2>
 
                                 {activeTab !== 'analytics' && (
-                                    <button
-                                        onClick={fetchData}
-                                        disabled={loadingData}
-                                        className="sm:hidden p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white active:scale-95 transform"
-                                    >
-                                        <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
-                                    </button>
+                                    <div className="flex gap-2 sm:hidden">
+                                        <button
+                                            onClick={handleCreate}
+                                            className="p-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-colors"
+                                            title="Add New"
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                        <button
+                                            onClick={fetchData}
+                                            disabled={loadingData}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                                        >
+                                            <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 
@@ -240,34 +352,44 @@ export default function DatabasePage() {
                                     </div>
                                 )}
 
-                                <button
-                                    onClick={fetchData}
-                                    disabled={loadingData}
-                                    className="hidden sm:block p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white active:scale-95 transform"
-                                    title="Refresh Data"
-                                >
-                                    <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
-                                </button>
+                                <div className="hidden sm:flex gap-2">
+                                    <button
+                                        onClick={handleCreate}
+                                        className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        <Plus size={16} /> New Record
+                                    </button>
+                                    <button
+                                        onClick={fetchData}
+                                        disabled={loadingData}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white active:scale-95 transform"
+                                        title="Refresh Data"
+                                    >
+                                        <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div className="bg-card rounded-xl border border-white/5 overflow-hidden">
                             <div className="overflow-x-auto max-h-[600px] overflow-y-auto global-scrollbar">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="bg-[#111] text-gray-400 sticky top-0 backdrop-blur-sm z-0">
+                                    <thead className="bg-[#111] text-gray-400 sticky top-0 backdrop-blur-sm z-10">
                                         <tr>
+                                            <th className="px-6 py-4 font-medium whitespace-nowrap border-b border-white/5 w-16">
+                                                Actions
+                                            </th>
                                             {columns.map(col => (
                                                 <th key={col} className="px-6 py-4 font-medium whitespace-nowrap border-b border-white/5">
                                                     {col.replace('_', ' ').toUpperCase()}
                                                 </th>
                                             ))}
-                                            {columns.length === 0 && !loadingData && <th className="px-6 py-4">Status</th>}
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
                                         {loadingData ? (
                                             <tr>
-                                                <td colSpan={columns.length || 1} className="px-6 py-12 text-center text-gray-500">
+                                                <td colSpan={columns.length + 1} className="px-6 py-12 text-center text-gray-500">
                                                     <div className="flex flex-col items-center gap-3">
                                                         <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                                                         <p>Loading data...</p>
@@ -283,16 +405,65 @@ export default function DatabasePage() {
                                                     transition={{ delay: i * 0.03, duration: 0.2 }}
                                                     className="hover:bg-white/5 transition-colors group"
                                                 >
-                                                    {columns.map(col => (
-                                                        <td key={`${i}-${col}`} className="px-6 py-3 text-gray-300 whitespace-nowrap max-w-xs truncate group-hover:text-white">
-                                                            {typeof row[col] === 'object' ? JSON.stringify(row[col]) : String(row[col])}
-                                                        </td>
-                                                    ))}
+                                                    {/* Actions Column */}
+                                                    <td className="px-6 py-3 whitespace-nowrap">
+                                                        <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button
+                                                                onClick={() => handleEdit(row)}
+                                                                className="p-1.5 hover:bg-blue-500/20 text-blue-400 rounded-md transition-colors"
+                                                                title="Edit"
+                                                            >
+                                                                <Edit size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(row)}
+                                                                disabled={deletingKey === String(row[getPrimaryKey()])}
+                                                                className="p-1.5 hover:bg-red-500/20 text-red-400 rounded-md transition-colors"
+                                                                title="Delete"
+                                                            >
+                                                                {deletingKey === String(row[getPrimaryKey()]) ?
+                                                                    <Loader2 size={14} className="animate-spin" /> :
+                                                                    <Trash2 size={14} />
+                                                                }
+                                                            </button>
+                                                        </div>
+                                                    </td>
+
+                                                    {columns.map(col => {
+                                                        const val = row[col];
+                                                        let displayVal: React.ReactNode = String(val);
+
+                                                        if (typeof val === 'object' && val !== null) {
+                                                            displayVal = JSON.stringify(val);
+                                                        } else if (col === 'updated_at' || col === 'created_at' || col === 'timestamp' || col === 'join_time' || col === 'leave_time') {
+                                                            try {
+                                                                const timestamp = Number(val);
+                                                                const d = !isNaN(timestamp) && timestamp > 0 ? new Date(timestamp) : new Date(String(val));
+
+                                                                if (!isNaN(d.getTime())) {
+                                                                    displayVal = d.toLocaleString('id-ID', {
+                                                                        day: 'numeric',
+                                                                        month: 'long',
+                                                                        year: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                        second: '2-digit'
+                                                                    });
+                                                                }
+                                                            } catch (e) { console.error('Date formatting error:', e); }
+                                                        }
+
+                                                        return (
+                                                            <td key={`${i}-${col}`} className="px-6 py-3 text-gray-300 whitespace-nowrap max-w-xs truncate group-hover:text-white">
+                                                                <span title={String(val)}>{displayVal}</span>
+                                                            </td>
+                                                        );
+                                                    })}
                                                 </motion.tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={columns.length || 1} className="px-6 py-12 text-center text-gray-500">
+                                                <td colSpan={columns.length + 1} className="px-6 py-12 text-center text-gray-500">
                                                     No records found.
                                                 </td>
                                             </tr>
@@ -302,6 +473,70 @@ export default function DatabasePage() {
                             </div>
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* EDIT/CREATE MODAL */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-[#1a1b1e] border border-white/10 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-white/10">
+                                <h3 className="text-xl font-bold">
+                                    {modalMode === 'create' ? 'Create New Record' : 'Edit Record'}
+                                </h3>
+                                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-6 space-y-4 global-scrollbar">
+                                {columns.map(col => (
+                                    <div key={col} className="space-y-1">
+                                        <label className="text-sm font-medium text-gray-300 capitalize">
+                                            {col.replace('_', ' ')}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={typeof editingRow[col] === 'object' ? JSON.stringify(editingRow[col]) : (editingRow[col] || '')}
+                                            onChange={(e) => setEditingRow({ ...editingRow, [col]: e.target.value })}
+                                            disabled={modalMode === 'edit' && col === getPrimaryKey()}
+                                            className={`
+                                                w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg text-white focus:border-primary focus:outline-none transition-colors
+                                                ${modalMode === 'edit' && col === getPrimaryKey() ? 'opacity-50 cursor-not-allowed' : ''}
+                                            `}
+                                        />
+                                        {modalMode === 'edit' && col === getPrimaryKey() && (
+                                            <p className="text-xs text-yellow-500/80">Primary keys cannot be edited.</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </form>
+
+                            <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-[#1a1b1e] rounded-b-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-4 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={saving}
+                                    className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                    Save Changes
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 

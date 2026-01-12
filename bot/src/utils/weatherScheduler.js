@@ -161,6 +161,7 @@ function startWeatherScheduler(client) {
     });
 
     console.log('[Weather] Scheduler started - checking every hour');
+    console.log(`[Weather] Current System Time: ${new Date().toString()}`);
 }
 
 module.exports = {

@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     libgbm1 \
     libasound2 \
     libsodium-dev \
+    tzdata \
     && pip3 install --break-system-packages yt-dlp \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

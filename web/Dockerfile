@@ -23,6 +23,9 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV DATABASE_PATH /app/data
 
+# Install tzdata for timezone support
+RUN apt-get update && apt-get install -y tzdata && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

@@ -10,6 +10,7 @@ services:
       - ./data:/app/data
     environment:
       - DATABASE_PATH=/app/data
+      - TZ=Asia/Jakarta
     restart: unless-stopped
 
   web:
@@ -21,6 +22,7 @@ services:
       - ./bot/.env
     environment:
       - DATABASE_PATH=/app/data
+      - TZ=Asia/Jakarta
     volumes:
       - ./data:/app/data
     restart: unless-stopped

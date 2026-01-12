@@ -171,18 +171,32 @@ export default function DatabasePage() {
                         exit={{ opacity: 0, y: -10 }}
                         className="space-y-4"
                     >
-                        <div className="flex justify-between items-center bg-card p-4 rounded-xl border border-white/5 relative z-10">
-                            <h2 className="text-lg font-semibold flex items-center gap-2 py-1">
-                                <TableIcon className="text-primary" size={20} />
-                                Viewing: {tabs.find(t => t.id === activeTab)?.label}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-4 rounded-xl border border-white/5 relative z-10">
+                            <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+                                <h2 className="text-lg font-semibold flex items-center gap-2 py-1">
+                                    <TableIcon className="text-primary" size={20} />
+                                    <span className="hidden sm:inline">Viewing:</span> {tabs.find(t => t.id === activeTab)?.label}
+                                </h2>
 
+                                {activeTab !== 'analytics' && (
+                                    <button
+                                        onClick={fetchData}
+                                        disabled={loadingData}
+                                        className="sm:hidden p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white active:scale-95 transform"
+                                    >
+                                        <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                                 {activeTab === 'analytics' && (
-                                    <div className="relative ml-2" ref={dropdownRef}>
+                                    <div className="relative w-full sm:w-auto" ref={dropdownRef}>
                                         <button
                                             onClick={() => setAnalyticsDropdownOpen(!analyticsDropdownOpen)}
-                                            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all hover:border-primary/50"
+                                            className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all hover:border-primary/50"
                                         >
-                                            <span className="text-gray-200">
+                                            <span className="text-gray-200 truncate">
                                                 {analyticsOptions.find(o => o.value === analyticsTable)?.label || 'Select Table'}
                                             </span>
                                             <motion.div
@@ -200,7 +214,7 @@ export default function DatabasePage() {
                                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                                     exit={{ opacity: 0, y: 5, scale: 0.95 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="absolute top-full left-0 mt-2 w-48 bg-[#1a1b1e] border border-white/10 rounded-lg shadow-xl overflow-hidden z-50 backdrop-blur-xl"
+                                                    className="absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 bg-[#1a1b1e] border border-white/10 rounded-lg shadow-xl overflow-hidden z-50 backdrop-blur-xl"
                                                 >
                                                     {analyticsOptions.map((option) => (
                                                         <button
@@ -225,15 +239,16 @@ export default function DatabasePage() {
                                         </AnimatePresence>
                                     </div>
                                 )}
-                            </h2>
-                            <button
-                                onClick={fetchData}
-                                disabled={loadingData}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white active:scale-95 transform"
-                                title="Refresh Data"
-                            >
-                                <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
-                            </button>
+
+                                <button
+                                    onClick={fetchData}
+                                    disabled={loadingData}
+                                    className="hidden sm:block p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white active:scale-95 transform"
+                                    title="Refresh Data"
+                                >
+                                    <RefreshCw size={18} className={loadingData ? 'animate-spin' : ''} />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="bg-card rounded-xl border border-white/5 overflow-hidden">

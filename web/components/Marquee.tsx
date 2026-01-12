@@ -11,7 +11,6 @@ const TECHNOLOGIES = [
     { name: 'QuickChart', color: '#FF6384' },
     { name: 'Lavalink', color: '#FF0000' },
     { name: 'SQLite', color: '#003B57' },
-    { name: 'JokoUI', color: '#a3e635' },
 ];
 
 export default function Marquee() {

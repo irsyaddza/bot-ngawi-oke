@@ -31,6 +31,7 @@ function initAnalyticsDB() {
             guild_id TEXT NOT NULL,
             user_id TEXT NOT NULL,
             channel_id TEXT NOT NULL,
+            content TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -64,24 +65,65 @@ function initAnalyticsDB() {
             enabled INTEGER DEFAULT 1
         );
 
+        -- Unified Activity Log
+        CREATE TABLE IF NOT EXISTS analytics_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            type TEXT NOT NULL, -- 'message', 'voice', 'command'
+            detail TEXT, -- Content, Command Name, or Channel Name
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
         -- Indexes
         CREATE INDEX IF NOT EXISTS idx_msg_guild_time ON analytics_messages(guild_id, timestamp);
         CREATE INDEX IF NOT EXISTS idx_voice_guild_time ON analytics_voice(guild_id, join_time);
+        CREATE INDEX IF NOT EXISTS idx_events_guild_time ON analytics_events(guild_id, timestamp);
     `);
+
+    // Migration: Add content column if missing
+    try {
+        const columns = db.pragma('table_info(analytics_messages)');
+        console.log('[Analytics] Current columns:', columns.map(c => c.name));
+        const hasContent = columns.some(c => c.name === 'content');
+        if (!hasContent) {
+            console.log('[Analytics] Migrating: Adding content column to analytics_messages');
+            db.prepare('ALTER TABLE analytics_messages ADD COLUMN content TEXT').run();
+        }
+    } catch (e) {
+        console.error('[Analytics] Migration error:', e.message);
+    }
 
     console.log('[Analytics] Database initialized');
     return db;
 }
 
+// ============ UNIFIED EVENT LOGGING ============
+
+function logEvent(guildId, userId, type, detail) {
+    initAnalyticsDB();
+    try {
+        db.prepare(`
+            INSERT INTO analytics_events (guild_id, user_id, type, detail)
+            VALUES (?, ?, ?, ?)
+        `).run(guildId, userId, type, detail);
+    } catch (e) {
+        console.error('[Analytics] Log Event Error:', e.message);
+    }
+}
+
 // ============ MESSAGE TRACKING ============
 
-function trackMessage(guildId, userId, channelId) {
+function trackMessage(guildId, userId, channelId, content) {
     initAnalyticsDB();
     const stmt = db.prepare(`
-        INSERT INTO analytics_messages (guild_id, user_id, channel_id)
-        VALUES (?, ?, ?)
+        INSERT INTO analytics_messages (guild_id, user_id, channel_id, content)
+        VALUES (?, ?, ?, ?)
     `);
-    stmt.run(guildId, userId, channelId);
+    stmt.run(guildId, userId, channelId, content || '');
+
+    // Also log to unified events
+    logEvent(guildId, userId, 'message', content ? content.substring(0, 50) : 'Sent a message');
 }
 
 // ============ VOICE TRACKING ============
@@ -93,6 +135,9 @@ function voiceJoin(guildId, userId, channelId) {
         VALUES (?, ?, ?, datetime('now'))
     `);
     stmt.run(guildId, userId, channelId);
+
+    // Log join event
+    logEvent(guildId, userId, 'voice', `Joined voice channel`);
 }
 
 function voiceLeave(guildId, userId) {
@@ -114,6 +159,9 @@ function voiceLeave(guildId, userId) {
 
         // Remove from active
         db.prepare(`DELETE FROM analytics_voice_active WHERE guild_id = ? AND user_id = ?`).run(guildId, userId);
+
+        // Log leave event
+        logEvent(guildId, userId, 'voice', `Left voice channel`);
     }
 }
 
@@ -121,6 +169,14 @@ function voiceMove(guildId, userId, newChannelId) {
     // Leave old channel, join new one
     voiceLeave(guildId, userId);
     voiceJoin(guildId, userId, newChannelId);
+
+    // Log move event (voiceJoin and voiceLeave handled above, but maybe specific move log? 
+    // Actually voiceLeave then voiceJoin is enough, but 'Moved' is cleaner.
+    // However, since we call Leave then Join, it will log "Left" then "Joined".
+    // Let's overwrite the last "Left" with "Moved" or just let it be.
+    // For simplicity, let's explicit log move here if we want, or just rely on Join/Leave.
+    // The previous calls handle it. But to be precise:
+    logEvent(guildId, userId, 'voice', `Moved voice channel`);
 }
 
 // ============ CONFIG ============
@@ -389,6 +445,7 @@ module.exports = {
     voiceJoin,
     voiceLeave,
     voiceMove,
+    logEvent,
     saveAnalyticsConfig,
     getAnalyticsConfig,
     getAllAnalyticsConfigs,

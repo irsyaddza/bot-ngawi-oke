@@ -57,15 +57,45 @@ export async function GET() {
             // Ignore if tables missing
         }
 
-        // 3. System Uptime (Application uptime in seconds)
-        // User requested 'codingan jalan berapa lama' (Process Uptime), not Server Uptime
+        // 3. System Uptime & Resources
         const uptime = process.uptime();
+        const memUsage = process.memoryUsage().rss; // Resident Set Size
+        const cpus = os.cpus().length;
+        const loadAvg = os.loadavg()[0];
+        const cpuPercent = Math.min(Math.floor((loadAvg / cpus) * 100), 100); // Rough estimate
+
+        // 4. Recent Activity Logs (Unified Timeline)
+        let recentLogs: any[] = [];
+        try {
+            const logs = db.prepare(`
+                SELECT user_id, type, detail, timestamp 
+                FROM analytics_events 
+                ORDER BY timestamp DESC 
+                LIMIT 10
+            `).all() as any[];
+
+            recentLogs = logs.map(l => ({
+                id: Math.random().toString(36).substr(2, 9),
+                type: l.type, // 'message', 'voice', 'command'
+                user: l.user_id,
+                description: l.detail,
+                time: l.timestamp
+            }));
+        } catch (e: any) {
+            console.error('[Stats API] Recent Logs Error:', e.message);
+            // Silent fallback if table doesn't exist yet
+        }
 
         const data = {
             voiceHours: Math.round((voiceStats?.total_seconds || 0) / 3600),
             messageCount: msgStats?.count || 0,
             activeUsers: activeUsersCount,
-            uptimeSeconds: uptime
+            uptimeSeconds: uptime,
+            system: {
+                memory: memUsage,
+                cpu: cpuPercent
+            },
+            recentLogs
         };
         console.log('[Stats API] Returning data:', data); // DEBUG
 

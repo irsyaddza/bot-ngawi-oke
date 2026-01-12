@@ -35,7 +35,7 @@ export const getAnalyticsDb = () => {
         // Open in ReadOnly mode mostly for dashboard safety, 
         // but Config pages might need write access later.
         // For now, let's allow write but default to read operations in UI.
-        analyticsDb.pragma('journal_mode = WAL');
+        analyticsDb.pragma('journal_mode = DELETE');
         return analyticsDb;
     } catch (err) {
         console.error(`[WebDB] Failed to connect to Analytics DB:`, err);
@@ -50,7 +50,7 @@ export const getWeatherDb = () => {
 
     try {
         weatherDb = new Database(dbPath, { fileMustExist: false });
-        weatherDb.pragma('journal_mode = WAL');
+        weatherDb.pragma('journal_mode = DELETE');
         return weatherDb;
     } catch (err) {
         console.error(`[WebDB] Failed to connect to Weather DB:`, err);

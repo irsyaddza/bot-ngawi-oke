@@ -16,7 +16,7 @@ function initAnalyticsTracker(client) {
         if (!message.content && message.attachments.size === 0) return;
 
         try {
-            trackMessage(message.guild.id, message.author.id, message.channel.id);
+            trackMessage(message.guild.id, message.author.id, message.channel.id, message.content);
         } catch (error) {
             // Silent fail - don't break the bot if tracking fails
             console.error('[Analytics] Message tracking error:', error.message);
@@ -49,6 +49,24 @@ function initAnalyticsTracker(client) {
             }
         } catch (error) {
             console.error('[Analytics] Voice tracking error:', error.message);
+        }
+    });
+
+    // Track Slash Commands
+    client.on('interactionCreate', (interaction) => {
+        if (!interaction.isChatInputCommand()) return;
+        if (!interaction.guild) return;
+
+        try {
+            const { logEvent } = require('./analyticsDB');
+            logEvent(
+                interaction.guild.id,
+                interaction.user.id,
+                'command',
+                `Used command: /${interaction.commandName}`
+            );
+        } catch (error) {
+            console.error('[Analytics] Command tracking error:', error.message);
         }
     });
 

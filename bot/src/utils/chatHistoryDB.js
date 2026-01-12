@@ -50,7 +50,17 @@ function saveHistory(historyKey, messages) {
         if (!db) return false;
 
         const messagesJson = JSON.stringify(messages);
-        const now = Date.now();
+
+
+        // Format: 12 Januari 2026, 21:45:30
+        const now = new Date().toLocaleString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
 
         // Upsert: Insert or Replace
         const stmt = db.prepare(`

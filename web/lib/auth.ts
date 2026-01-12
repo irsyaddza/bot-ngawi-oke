@@ -1,6 +1,8 @@
 import { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 
+import { isAdminInDB } from "@/lib/settingsDB";
+
 const isDev = process.env.APP_ENV === 'development';
 
 const clientId = isDev ? process.env.DEV_CLIENT_ID : process.env.DISCORD_CLIENT_ID;
@@ -17,14 +19,15 @@ export const authOptions: NextAuthOptions = {
         async signIn({ user, account, profile }) {
             // Allow only specific user ID (Bot Owner)
             // You can add more IDs to the array or check against an environment variable
-            const ALLOWED_IDS = [process.env.ADMIN_ID];
+            const MASTER_ADMIN = process.env.ADMIN_ID;
 
-            if (user.id && ALLOWED_IDS.includes(user.id)) {
-                return true;
+            if (user.id) {
+                if (user.id === MASTER_ADMIN) return true;
+                if (isAdminInDB(user.id)) return true;
             }
 
             console.log(`[Auth] Access denied for user: ${user.name} (${user.id})`);
-            return false; // Return false to display a default error message
+            return false;
         },
         async session({ session, token }) {
             if (session?.user) {

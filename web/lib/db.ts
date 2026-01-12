@@ -31,7 +31,7 @@ export const getAnalyticsDb = () => {
     }
 
     try {
-        analyticsDb = new Database(dbPath, { readonly: true, fileMustExist: false });
+        analyticsDb = new Database(dbPath, { fileMustExist: false });
         // Open in ReadOnly mode mostly for dashboard safety, 
         // but Config pages might need write access later.
         // For now, let's allow write but default to read operations in UI.

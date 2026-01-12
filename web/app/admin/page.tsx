@@ -14,28 +14,43 @@ export default function AdminDashboard() {
     });
 
     useEffect(() => {
-        fetch('/api/admin/stats')
-            .then(res => {
-                if (!res.ok) throw new Error('API Error');
-                return res.json();
-            })
-            .then(data => {
-                if (!data) return;
-                // Format uptime from seconds to readable string
-                const h = Math.floor((data.uptimeSeconds || 0) / 3600);
-                const m = Math.floor(((data.uptimeSeconds || 0) % 3600) / 60);
+        const fetchStats = () => {
+            fetch('/api/admin/stats')
+                .then(res => {
+                    if (!res.ok) throw new Error('API Error');
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    // Format uptime from seconds to readable string
+                    const totalSeconds = data.uptimeSeconds || 0;
+                    const d = Math.floor(totalSeconds / (3600 * 24));
+                    const h = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+                    const m = Math.floor((totalSeconds % 3600) / 60);
+                    const s = Math.floor(totalSeconds % 60);
 
-                setStats({
-                    voiceHours: data.voiceHours || 0,
-                    messageCount: data.messageCount || 0,
-                    activeUsers: data.activeUsers || 0,
-                    uptime: `${h}h ${m}m`
+                    const uptimeStr = `${d}d ${h}h ${m}m ${s}s`;
+
+                    setStats({
+                        voiceHours: data.voiceHours || 0,
+                        messageCount: data.messageCount || 0,
+                        activeUsers: data.activeUsers || 0,
+                        uptime: uptimeStr
+                    });
+                })
+                .catch(err => {
+                    console.error('Failed to fetch stats:', err);
+                    // Keep default 0 values on error
                 });
-            })
-            .catch(err => {
-                console.error('Failed to fetch stats:', err);
-                // Keep default 0 values on error
-            });
+        };
+
+        // Fetch immediately
+        fetchStats();
+
+        // 5 seconds polling
+        const interval = setInterval(fetchStats, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     return (
@@ -54,7 +69,7 @@ export default function AdminDashboard() {
                     { label: "Voice Time", value: `${stats.voiceHours} Hrs`, trend: "Calculated" },
                     { label: "Active Users", value: stats.activeUsers.toLocaleString(), trend: "Last 30 days" },
                     { label: "Total Messages", value: (stats.messageCount / 1000).toFixed(1) + 'k', trend: "All time" },
-                    { label: "System Uptime", value: stats.uptime, trend: "Status: Online" },
+                    { label: "App Uptime", value: stats.uptime, trend: "Status: Online" },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}

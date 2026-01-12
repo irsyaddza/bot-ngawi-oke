@@ -8,6 +8,8 @@ services:
       - ./bot/.env
     volumes:
       - ./data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data
     restart: unless-stopped
 
   web:

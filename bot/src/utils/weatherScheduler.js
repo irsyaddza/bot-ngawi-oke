@@ -19,8 +19,13 @@ function initWeatherDB() {
 
     // Ensure data directory exists
     if (!fs.existsSync(dataDir)) {
+        console.log(`[Weather] Creating data directory at: ${dataDir}`);
         fs.mkdirSync(dataDir, { recursive: true });
     }
+
+    // DEBUG: Log resolved path
+    console.log(`[Weather] initWeatherDB - DataDir: ${dataDir}`);
+    console.log(`[Weather] initWeatherDB - DBPath: ${dbPath}`);
 
     db = new Database(dbPath);
 
@@ -68,7 +73,20 @@ function getWeatherConfig(guildId) {
 function getAllWeatherConfigs() {
     initWeatherDB();
     const stmt = db.prepare('SELECT * FROM weather_config WHERE enabled = 1');
-    return stmt.all();
+    const rows = stmt.all();
+    console.log(`[Weather] getAllWeatherConfigs - Found ${rows.length} rows (enabled=1)`);
+    return rows;
+}
+
+/**
+ * Get ALL weather configs (Active & Disabled) for Admin
+ */
+function getAllWeatherConfigsRaw() {
+    initWeatherDB();
+    const stmt = db.prepare('SELECT * FROM weather_config'); // No filter
+    const rows = stmt.all();
+    console.log(`[Weather] getAllWeatherConfigsRaw - Found ${rows.length} total rows`);
+    return rows;
 }
 
 /**
@@ -78,6 +96,16 @@ function disableWeather(guildId) {
     initWeatherDB();
     const stmt = db.prepare('UPDATE weather_config SET enabled = 0 WHERE guild_id = ?');
     return stmt.run(guildId);
+}
+
+/**
+ * Disable weather by location name (Admin)
+ */
+function disableWeatherByLocation(location) {
+    initWeatherDB();
+    // Using LIKE for flexible matching (case-insensitive in SQLite usually)
+    const stmt = db.prepare('UPDATE weather_config SET enabled = 0 WHERE location LIKE ?');
+    return stmt.run(`%${location}%`);
 }
 
 /**
@@ -140,7 +168,9 @@ module.exports = {
     saveWeatherConfig,
     getWeatherConfig,
     getAllWeatherConfigs,
+    getAllWeatherConfigsRaw,
     disableWeather,
+    disableWeatherByLocation,
     sendWeatherUpdate,
     startWeatherScheduler
 };

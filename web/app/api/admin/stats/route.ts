@@ -57,8 +57,9 @@ export async function GET() {
             // Ignore if tables missing
         }
 
-        // 3. System Uptime (OS uptime in seconds)
-        const uptime = os.uptime();
+        // 3. System Uptime (Application uptime in seconds)
+        // User requested 'codingan jalan berapa lama' (Process Uptime), not Server Uptime
+        const uptime = process.uptime();
 
         const data = {
             voiceHours: Math.round((voiceStats?.total_seconds || 0) / 3600),

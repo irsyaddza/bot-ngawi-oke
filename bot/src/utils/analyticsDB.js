@@ -20,6 +20,8 @@ function initAnalyticsDB() {
     }
 
     db = new Database(dbPath);
+    // Disable WAL mode as it causes issues with Docker volume mounts on Windows (SQLITE_IOERR_SHMOPEN)
+    db.pragma('journal_mode = DELETE');
 
     // Create tables
     db.exec(`

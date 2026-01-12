@@ -189,7 +189,7 @@ export default function DatabasePage() {
 
 
     const tabs = [
-        { id: 'backup', label: 'Backup & Restore', icon: Database },
+        { id: 'backup', label: 'Backup Section', icon: Database },
         { id: 'chat_history', label: 'Chat History', icon: TableIcon },
         { id: 'weather', label: 'Weather Config', icon: TableIcon },
         { id: 'analytics', label: 'Analytics', icon: TableIcon },
@@ -274,7 +274,7 @@ export default function DatabasePage() {
                         className="space-y-4"
                     >
                         {/* Header & Controls */}
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-4 rounded-xl border border-white/5 relative z-10">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-4 rounded-xl border border-white/5 relative z-20">
                             <div className="flex items-center justify-between w-full sm:w-auto gap-4">
                                 <h2 className="text-lg font-semibold flex items-center gap-2 py-1">
                                     <TableIcon className="text-primary" size={20} />
@@ -308,7 +308,7 @@ export default function DatabasePage() {
                                             onClick={() => setAnalyticsDropdownOpen(!analyticsDropdownOpen)}
                                             className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all hover:border-primary/50"
                                         >
-                                            <span className="text-gray-200 truncate">
+                                            <span className="text-gray-200 whitespace-nowrap">
                                                 {analyticsOptions.find(o => o.value === analyticsTable)?.label || 'Select Table'}
                                             </span>
                                             <motion.div
@@ -326,7 +326,7 @@ export default function DatabasePage() {
                                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                                     exit={{ opacity: 0, y: 5, scale: 0.95 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 bg-[#1a1b1e] border border-white/10 rounded-lg shadow-xl overflow-hidden z-50 backdrop-blur-xl"
+                                                    className="absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 bg-[#1a1b1e] border border-white/10 rounded-lg shadow-xl overflow-hidden z-50 backdrop-blur-xl min-w-[220px]"
                                                 >
                                                     {analyticsOptions.map((option) => (
                                                         <button
@@ -373,7 +373,7 @@ export default function DatabasePage() {
 
                         <div className="bg-card rounded-xl border border-white/5 overflow-hidden">
                             <div className="overflow-x-auto max-h-[600px] overflow-y-auto global-scrollbar">
-                                <table className="w-full text-sm text-left">
+                                <table className="w-full min-w-max text-sm text-left">
                                     <thead className="bg-[#111] text-gray-400 sticky top-0 backdrop-blur-sm z-10">
                                         <tr>
                                             <th className="px-6 py-4 font-medium whitespace-nowrap border-b border-white/5 w-16">

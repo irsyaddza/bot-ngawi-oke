@@ -60,8 +60,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                         key={item.href}
                                         href={item.href}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
-                                                ? 'bg-primary/10 text-primary border border-primary/20'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            ? 'bg-primary/10 text-primary border border-primary/20'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         <item.icon size={18} />
@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </AnimatePresence>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col relative">
+            <main className="flex-1 flex flex-col relative min-w-0">
                 <header className="h-16 px-6 border-b border-white/5 flex items-center bg-background/50 backdrop-blur-sm sticky top-0 z-40">
                     {!isSidebarOpen && (
                         <button

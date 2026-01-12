@@ -6,7 +6,7 @@ import { Github, Terminal, ArrowRight, Star, GitFork, Activity } from 'lucide-re
 import Link from 'next/link';
 
 export default function Hero() {
-    const [stats, setStats] = useState({ stars: 124, forks: 45, commits: 890 }); // Mock start
+    const [stats, setStats] = useState({ stars: 124, forks: 45, commits: 890, release: 'v1.0.0' }); // Mock start
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -14,6 +14,11 @@ export default function Hero() {
                 // Fetch Repo Details (Stars & Forks)
                 const repoRes = await fetch('https://api.github.com/repos/irsyaddza/bot-ngawi-oke');
                 const repoData = await repoRes.json();
+
+                // Fetch Latest Release
+                const releaseRes = await fetch('https://api.github.com/repos/irsyaddza/bot-ngawi-oke/releases/latest');
+                const releaseData = await releaseRes.json();
+                const latestVersion = releaseData.tag_name || 'v1.0.0';
 
                 // Fetch Commits Count (using headers trick)
                 const commitsRes = await fetch('https://api.github.com/repos/irsyaddza/bot-ngawi-oke/commits?per_page=1');
@@ -34,7 +39,8 @@ export default function Hero() {
                 setStats({
                     stars: repoData.stargazers_count || 0,
                     forks: repoData.forks_count || 0,
-                    commits: commitCount || 0
+                    commits: commitCount || 0,
+                    release: latestVersion
                 });
             } catch (error) {
                 console.error('Failed to fetch GitHub stats:', error);
@@ -63,7 +69,7 @@ export default function Hero() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        v1.0.0 Stable Release
+                        {stats.release} Stable Release
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">

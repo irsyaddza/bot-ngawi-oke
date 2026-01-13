@@ -75,9 +75,15 @@ async function handleStats() {
 
             // 3. Top Users (Messages)
             const topUsersQuery = `
-                SELECT user_id, COUNT(*) as count
-                FROM analytics_messages
-                GROUP BY user_id
+                SELECT 
+                    m.user_id, 
+                    COUNT(*) as count,
+                    u.username,
+                    u.display_name,
+                    u.avatar_url
+                FROM analytics_messages m
+                LEFT JOIN analytics_users u ON m.user_id = u.user_id
+                GROUP BY m.user_id
                 ORDER BY count DESC
                 LIMIT 5
             `;

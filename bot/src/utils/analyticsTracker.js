@@ -1,5 +1,5 @@
 // Analytics Tracker - Event handlers for message and voice tracking
-const { trackMessage, voiceJoin, voiceLeave, voiceMove, initAnalyticsDB } = require('./analyticsDB');
+const { trackMessage, voiceJoin, voiceLeave, voiceMove, initAnalyticsDB, updateUserCache } = require('./analyticsDB');
 
 /**
  * Initialize analytics tracking on the client
@@ -16,6 +16,14 @@ function initAnalyticsTracker(client) {
         if (!message.content && message.attachments.size === 0) return;
 
         try {
+            // Update user cache
+            updateUserCache(
+                message.author.id,
+                message.author.username,
+                message.member?.displayName || message.author.globalName,
+                message.author.displayAvatarURL({ extension: 'png' })
+            );
+
             trackMessage(message.guild.id, message.author.id, message.channel.id, message.content);
         } catch (error) {
             // Silent fail - don't break the bot if tracking fails
@@ -27,13 +35,24 @@ function initAnalyticsTracker(client) {
     client.on('voiceStateUpdate', (oldState, newState) => {
         const guildId = newState.guild?.id || oldState.guild?.id;
         const userId = newState.member?.id || oldState.member?.id;
+        const member = newState.member || oldState.member;
 
         if (!guildId || !userId) return;
 
         // Ignore bots
-        if (newState.member?.user?.bot || oldState.member?.user?.bot) return;
+        if (member?.user?.bot) return;
 
         try {
+            // Update user cache
+            if (member?.user) {
+                updateUserCache(
+                    member.user.id,
+                    member.user.username,
+                    member.displayName || member.user.globalName,
+                    member.user.displayAvatarURL({ extension: 'png' })
+                );
+            }
+
             const oldChannel = oldState.channel;
             const newChannel = newState.channel;
 
@@ -58,6 +77,14 @@ function initAnalyticsTracker(client) {
         if (!interaction.guild) return;
 
         try {
+            // Update user cache
+            updateUserCache(
+                interaction.user.id,
+                interaction.user.username,
+                interaction.member?.displayName || interaction.user.globalName,
+                interaction.user.displayAvatarURL({ extension: 'png' })
+            );
+
             const { logEvent } = require('./analyticsDB');
             logEvent(
                 interaction.guild.id,

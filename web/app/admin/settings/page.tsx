@@ -141,18 +141,28 @@ export default function SettingsPage() {
                                             onClick={() => updateSetting('ai_logic', logic)}
                                             disabled={saving === 'ai_logic'}
                                             className={`
-                                                relative px-4 py-3 rounded-lg border text-left transition-all
+                                                relative px-4 py-3 rounded-lg border text-left transition-all cursor-pointer group
                                                 ${settings.ai_logic === logic
                                                     ? 'bg-primary/10 border-primary text-white'
                                                     : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}
                                             `}
                                         >
-                                            <span className="font-semibold capitalize block">{logic}</span>
-                                            <span className="text-xs opacity-60">
-                                                {logic === 'gemini' ? 'Balanced & Fast' : 'Reasoning & Creative'}
-                                            </span>
+                                            <div className="relative z-10">
+                                                <span className="font-semibold capitalize block">{logic}</span>
+                                                <span className="text-xs opacity-60">
+                                                    {logic === 'gemini' ? 'Balanced & Fast' : 'Reasoning & Creative'}
+                                                </span>
+                                            </div>
                                             {settings.ai_logic === logic && (
-                                                <motion.div layoutId="activeLogic" className="absolute inset-0 border-2 border-primary rounded-lg" />
+                                                <motion.div
+                                                    layoutId="activeLogic"
+                                                    className="absolute inset-0 border-2 border-primary bg-primary/5 rounded-lg pointer-events-none"
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 500,
+                                                        damping: 30
+                                                    }}
+                                                />
                                             )}
                                         </button>
                                     ))}

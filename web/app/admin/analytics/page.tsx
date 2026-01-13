@@ -210,7 +210,12 @@ export default function AnalyticsPage() {
                                             {i + 1}
                                         </div>
                                         <div className="flex flex-col overflow-hidden">
-                                            <span className="font-medium text-gray-200 truncate max-w-[120px]">{user.user_id}</span>
+                                            <span className="font-medium text-gray-200 truncate max-w-[120px]">
+                                                {user.display_name || user.username || user.user_id}
+                                            </span>
+                                            {user.username && (
+                                                <span className="text-[10px] text-gray-500 truncate">@{user.username}</span>
+                                            )}
                                             <div className="w-24 bg-white/10 rounded-full h-1 mt-1.5">
                                                 <div
                                                     className="bg-primary h-1 rounded-full"
@@ -237,7 +242,7 @@ export default function AnalyticsPage() {
                         <thead className="bg-white/5 text-gray-400">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Rank</th>
-                                <th className="px-6 py-4 font-medium">User ID</th>
+                                <th className="px-6 py-4 font-medium">User</th>
                                 <th className="px-6 py-4 font-medium text-right">Message Count</th>
                                 <th className="px-6 py-4 font-medium">Activity Level</th>
                             </tr>
@@ -257,7 +262,25 @@ export default function AnalyticsPage() {
                                                 {i + 1}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 font-medium text-gray-200">{user.user_id}</td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                {user.avatar_url ? (
+                                                    <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full bg-white/5" />
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                                                        <Users size={14} className="text-gray-500" />
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-gray-200">
+                                                        {user.display_name || user.username || user.user_id}
+                                                    </span>
+                                                    {user.username && (
+                                                        <span className="text-xs text-gray-500">@{user.username}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td className="px-6 py-4 text-right">{user.count.toLocaleString()}</td>
                                         <td className="px-6 py-4">
                                             <div className="w-full bg-white/10 rounded-full h-1.5 max-w-[100px]">

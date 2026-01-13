@@ -6,7 +6,7 @@ import fs from 'fs';
 let analyticsDb: Database.Database | null = null;
 let weatherDb: Database.Database | null = null;
 
-const getDataDir = () => {
+export const getDataDir = () => {
     // Priority: 
     // Priority:
     // 1. Env Var (Docker/Manual Override)

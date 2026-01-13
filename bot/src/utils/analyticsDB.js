@@ -75,6 +75,15 @@ function initAnalyticsDB() {
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
+        -- User Info Cache
+        CREATE TABLE IF NOT EXISTS analytics_users (
+            user_id TEXT PRIMARY KEY,
+            username TEXT NOT NULL,
+            display_name TEXT,
+            avatar_url TEXT,
+            last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
         -- Indexes
         CREATE INDEX IF NOT EXISTS idx_msg_guild_time ON analytics_messages(guild_id, timestamp);
         CREATE INDEX IF NOT EXISTS idx_voice_guild_time ON analytics_voice(guild_id, join_time);
@@ -96,6 +105,26 @@ function initAnalyticsDB() {
 
     console.log('[Analytics] Database initialized');
     return db;
+}
+
+/**
+ * Update or insert user info into cache
+ */
+function updateUserCache(userId, username, displayName = null, avatarUrl = null) {
+    initAnalyticsDB();
+    try {
+        db.prepare(`
+            INSERT INTO analytics_users (user_id, username, display_name, avatar_url, last_seen)
+            VALUES (?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(user_id) DO UPDATE SET
+                username = excluded.username,
+                display_name = excluded.display_name,
+                avatar_url = excluded.avatar_url,
+                last_seen = datetime('now')
+        `).run(userId, username, displayName, avatarUrl);
+    } catch (e) {
+        console.error('[Analytics] Update User Cache Error:', e.message);
+    }
 }
 
 // ============ UNIFIED EVENT LOGGING ============
@@ -446,6 +475,7 @@ module.exports = {
     voiceLeave,
     voiceMove,
     logEvent,
+    updateUserCache,
     saveAnalyticsConfig,
     getAnalyticsConfig,
     getAllAnalyticsConfigs,

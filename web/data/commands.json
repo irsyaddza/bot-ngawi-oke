@@ -23,9 +23,9 @@
                 "usage": "/queue"
             },
             {
-                "name": "/lyrics",
+                "name": "lyrics button",
                 "description": "Get lyrics for the current song",
-                "usage": "/lyrics"
+                "usage": "click lyrics button"
             }
         ]
     },
@@ -33,19 +33,29 @@
         "category": "AI",
         "commands": [
             {
-                "name": "/chat",
+                "name": "Bot chat",
                 "description": "Start a conversation with Gemini AI",
-                "usage": "/chat <message>"
+                "usage": "@bot <chat>"
             },
             {
-                "name": "/ask",
-                "description": "One-off question to DeepSeek R1",
-                "usage": "/ask <question>"
+                "name": "Profile photo roast",
+                "description": "Roasting pfp your target",
+                "usage": "@bot pp @target"
             },
             {
-                "name": "/imagine",
-                "description": "Generate image using AI",
-                "usage": "/imagine <prompt>"
+                "name": "Change AI model",
+                "description": "Change your AI model Gemini or Deepseek",
+                "usage": "/logic"
+            },
+            {
+                "name": "Current AI model check",
+                "description": "Check your active AI model",
+                "usage": "/logiccheck"
+            },
+            {
+                "name": "Change AI model",
+                "description": "Change your AI model Gemini or Deepseek",
+                "usage": "/logic"
             }
         ]
     },
@@ -53,19 +63,29 @@
         "category": "Weather",
         "commands": [
             {
-                "name": "/weather",
+                "name": "/weather now",
                 "description": "Check current weather for a location",
-                "usage": "/weather <city>"
+                "usage": "/weather now <city>"
             },
             {
-                "name": "/setweather",
+                "name": "/weather set",
                 "description": "Configure daily weather updates",
-                "usage": "/setweather <city> <channel>"
+                "usage": "/setweather <city> <channel> <time>"
             },
             {
-                "name": "/weather-disable",
+                "name": "/weather stop",
                 "description": "Disable scheduled updates",
-                "usage": "/weather-disable"
+                "usage": "/weather stop"
+            },
+            {
+                "name": "/weather-admin list",
+                "description": "List active weather schedule",
+                "usage": "/weather-admin list"
+            },
+            {
+                "name": "/weather-admin remove",
+                "description": "Remove weather schedule",
+                "usage": "/weather-admin remove"
             }
         ]
     },
@@ -73,19 +93,44 @@
         "category": "Analytics",
         "commands": [
             {
-                "name": "/analytics",
-                "description": "View server activity stats",
-                "usage": "/analytics"
+                "name": "/analytics stats",
+                "description": "View your activity stats",
+                "usage": "/analytics stats"
             },
             {
-                "name": "/leaderboard",
+                "name": "/analytics leaderboard",
                 "description": "Show top active members",
-                "usage": "/leaderboard"
+                "usage": "/analytics leaderboard"
             },
             {
-                "name": "/voice-stats",
-                "description": "Show voice channel usage time",
-                "usage": "/voice-stats"
+                "name": "/analytics test preview",
+                "description": "Show report activity for admin test",
+                "usage": "/analytics test preview"
+            },
+            {
+                "name": "/analytics test seed",
+                "description": "Generate dummy data for admin test",
+                "usage": "/analytics test seed"
+            },
+            {
+                "name": "/analytics setup",
+                "description": "Setup weekly report channel",
+                "usage": "/analytics setup"
+            },
+            {
+                "name": "/analytics test clear",
+                "description": "Delete all data analytics for admin",
+                "usage": "/analytics test clear"
+            },
+            {
+                "name": "/analytics report",
+                "description": "Generate weekly report now for admin",
+                "usage": "/analytics test clear"
+            },
+            {
+                "name": "/analytics stop",
+                "description": "Stop weekly report",
+                "usage": "/analytics stop"
             }
         ]
     },
@@ -98,14 +143,104 @@
                 "usage": "/ping"
             },
             {
-                "name": "/avatar",
-                "description": "Get user profile picture",
-                "usage": "/avatar [user]"
+                "name": "/auditlog disable",
+                "description": "Disable audit log",
+                "usage": "/auditlog disable"
             },
             {
-                "name": "/siapo",
-                "description": "Check who is in a voice channel",
-                "usage": "/siapo"
+                "name": "/auditlog status",
+                "description": "Check auditlog status",
+                "usage": "/auditlog status"
+            },
+            {
+                "name": "/changebio",
+                "description": "Change bot's bio",
+                "usage": "/changebio <bio>"
+            },
+            {
+                "name": "/changelog",
+                "description": "Check changelog",
+                "usage": "/changelog"
+            },
+            {
+                "name": "/changepfp",
+                "description": "Change bot's pfp",
+                "usage": "/changepfp"
+            },
+            {
+                "name": "/changevoice",
+                "description": "Change bot's voice",
+                "usage": "/changevoice"
+            },
+            {
+                "name": "/chatdb",
+                "description": "Check ai chat history",
+                "usage": "/chatdb"
+            },
+            {
+                "name": "/cmd",
+                "description": "Check command list",
+                "usage": "/cmd"
+            },
+            {
+                "name": "/dashboard",
+                "description": "Check bot's dashboard",
+                "usage": "/dashboard"
+            },
+            {
+                "name": "/dl",
+                "description": "Viceo downloader",
+                "usage": "/dl <link>"
+            },
+            {
+                "name": "/giverole",
+                "description": "Give someone role for admin",
+                "usage": "/giverole"
+            },
+            {
+                "name": "/join",
+                "description": "Join voice channel for bot",
+                "usage": "/join <voice channel>"
+            },
+            {
+                "name": "/leave",
+                "description": "Leave voice channel for bot",
+                "usage": "/leave"
+            },
+            {
+                "name": "/replybot",
+                "description": "Reply somone's messages with bot",
+                "usage": "/replybot"
+            },
+            {
+                "name": "/say",
+                "description": "Text to speech for bot",
+                "usage": "/say <text>"
+            },
+            {
+                "name": "/send",
+                "description": "Send a messages for bot",
+                "usage": "/send <channel> <text>"
+            },
+            {
+                "name": "/takerole",
+                "description": "Take somone role using bot",
+                "usage": "/takerole"
+            },
+            {
+                "name": "/voicechat",
+                "description": "Bot will hear your voice, say halo rusdi",
+                "usage": "/voicechat"
+            },
+            {
+                "name": "/voicelock",
+                "description": "Lock voice channel",
+                "usage": "/voicelock"
+            },
+            {
+                "name": "/voicewelcome",
+                "description": "Welcome voice",
+                "usage": "/voicewelcome"
             }
         ]
     }

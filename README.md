@@ -2,203 +2,132 @@
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.js.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![Lavalink](https://img.shields.io/badge/Lavalink-FF5555?style=for-the-badge&logo=java&logoColor=white)](https://lavalink.dev/)
-[![Kazagumo](https://img.shields.io/badge/Kazagumo-9B59B6?style=for-the-badge&logo=musicbrainz&logoColor=white)](https://github.com/Takiyo0/Kazagumo)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
-[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)
-[![Open-Meteo](https://img.shields.io/badge/Open--Meteo-00a8ff?style=for-the-badge&logo=cloudfoundry&logoColor=white)](https://open-meteo.com/)
 
-**Fun discord bot**  
+**Fun Discord Bot & Web Dashboard Integration**
 
 ---
 
-## 🔥 Fitur Utama
+## 🚀 Cara Setup
 
-### 📥 All-in-One Downloader
-Mau nyomot video dari mana aja? Gas!
-- **1000+ Sites Supported**: TikTok, Facebook, Instagram, Twitter/X, YouTube, Reddit, dan banyak lagi.
-- **Smart Embed**: Tampilan bersih, ada tombol "source"
-- **Audio Only**: Bisa convert video jadi MP3 juga kalau cuma butuh suaranya.
+### 1. Persiapan
+Pastikan kamu sudah menginstall:
+- **Node.js** (Minimal v18+, v22 Recommended)
+- **Git**
+- **Docker** (Optional, tapi recommended buat deployment)
 
-### 🎵 Music System (Powered by Lavalink)
-Bosen sepi? Rusdi bisa nyetel lagu dari mana aja:
-- **Multi-Platform Support**: YouTube, Spotify, SoundCloud.
-- **Lavalink Backend**: Audio streaming via Lavalink server - lebih stabil dan reliable.
-- **Interactive Controls**: Gak perlu ngetik terus, tinggal klik tombol-tombol cakep buat Skip, Pause, Shuffle, dll.
-- **Queue System**: Add, shuffle, repeat, dan manage playlist dengan mudah.
+### 2. Clone Repository
+```bash
+git clone https://github.com/irsyaddza/bot-ngawi-oke.git
+cd bot-ngawi-oke
+```
 
-### 🎙️ Voice & TTS (Text-to-Speech)
-Ngobrol tanpa mic? Bisa banget:
-- **Premium Voices**: Pake engine premium kayak ElevenLabs & Edge TTS.
-- **Auto Welcomer**: Bot auto nyapa siapa aja yang nongol di Voice Channel. Lu gak bakal sendirian lagi.
-- **Voice Chat AI**: Panggil "Halo Rusdi", dan si bot bakal jawab pake suara aslinya.
+### 3. Konfigurasi Environment (`.env`)
+Buat file bernama `.env` di **folder root** project, lalu copy-paste konfigurasi di bawah ini dan isi value-nya:
 
-### 🤖 Smart AI Interaction
-Rusdi pinter (kadang-kadang) karena dibekali otak dari Google Gemini & DeepSeek:
-- **Persistent Memory**: Chat history disimpan ke database, Rusdi ingat percakapan sebelumnya!
-- **Dual AI Engine**: Bisa switch antara Gemini dan DeepSeek sesuai kebutuhan.
-- **Server Info**: Cek kondisi server lewat chat biasa.
-- **Moderator**: Rusdi bisa nge-kick, ban, mute, atau hapus pesan kalo disuruh (asal ada izin).
+```properties
+# --- Config Mode ---
+# Pilih: 'development' atau 'production'
+APP_ENV=development
 
-### 🔒 Voice Lock
-Kunci voice channel biar gak sembarang orang join:
-- **Whitelist System**: Pilih user/role yang boleh join.
-- **Smart Block**: User yang gak berhak auto di-kick tanpa ganggu yang udah di dalem.
-- **Persistent**: Konfigurasi tetap aman meski bot restart.
+# --- Production Keys (Default) ---
+DISCORD_TOKEN=
+CLIENT_ID=
+GUILD_ID=
+DISCORD_CLIENT_SECRET=
 
-### 📋 Audit Log
-Pantau aktivitas server secara real-time:
-- **Voice Events**: Join, Leave, Mute, Deafen, Kick.
-- **Member Events**: Join, Leave, Ban, Unban.
-- **Mod Tracking**: Tau siapa yang nge-kick/ban/mute.
+# --- Development Keys ---
+# Diperlukan jika APP_ENV=development
+DEV_DISCORD_TOKEN=
+DEV_CLIENT_ID=
+DEV_GUILD_ID=
+DEV_DISCORD_CLIENT_SECRET=
 
-### 📊 Server Analytics
-Weekly report server activity dengan AI-powered insights:
-- **Message Tracking**: Track semua pesan per user.
-- **Voice Tracking**: Hitung durasi voice chat per user.
-- **AI Roasts**: Komentar lucu untuk top members (powered by Gemini/DeepSeek).
-- **Visual Charts**: Grafik aktivitas harian via QuickChart.io.
-- **Scheduled Reports**: Auto-post weekly report ke channel pilihan.
+# --- API Keys ---
+# Isi sesuai fitur yang ingin digunakan
+ELEVENLABS_API_KEY=
+GEMINI_API_KEY=
+GITHUB_TOKEN=
+OPENROUTER_API_KEY=
+EMBEDEZ_API_KEY=
 
----
+# --- Web Auth ---
+# Konfigurasi untuk Dashboard Web
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=
+ADMIN_ID=
+```
 
-## 🛠️ Daftar Command
+### 4. Instalasi & Menjalankan (Manual)
 
-### 📥 Downloader & Utility
-| Command | Apa gunanya? |
-| :--- | :--- |
-| **/dl** `[url]` | Download video dari TikTok, FB, IG, YT, dll. |
-| **/dashboard** | Cek system status Gemini/ElevenLabs/OpenRouter. |
-| **/ping** | Cek seberapa lemot bot merespon (latency). |
+Kamu bisa menjalankan Bot dan Web secara terpisah di terminal yang berbeda.
 
-### 🔊 Music & Voice
-| Command | Apa gunanya? |
-| :--- | :--- |
-| **/play** `[lagu]` | Nyetel musik + munculin tombol kontrol. |
-| **/stop** | Kasih dia istirahat, stop musik & bersihin queue. |
-| **/queue** | Intip lagu apa aja yang bakal diputer selanjutnya. |
-| **/say** `[pesan]` | Suruh bot ngomong sesuatu di VC. |
-| **/join** / **/leave** | Panggil atau usir bot dari voice channel. |
-| **/changevoice** | Ganti-ganti suara bot (Edge/ElevenLabs). |
+#### A. Menjalankan BOT
+```bash
+cd bot
+npm install
 
-### 👮 Moderasi & Admin
-| Command | Apa gunanya? |
-| :--- | :--- |
-| **/giverole** / **/takerole** | Atur role member gak pake ribet. |
-| **/send** `[channel]` `[gambar]` | Kirim pesan + gambar lewat bot ke channel lain. |
-| **/voicelock** | Lock/Unlock voice channel + whitelist. |
-| **/auditlog** | Setting channel untuk audit log server. |
+# Register Slash Commands (Wajib saat pertama kali atau ada update command)
+npm run deploy
 
-### 🤖 AI & Database
-| Command | Apa gunanya? |
-| :--- | :--- |
-| **/logic** | Switch AI antara Gemini dan DeepSeek. |
-| **/logiccheck** | Cek AI mana yang lagi aktif. |
-| **/chatdb** | Lihat statistik database chat history. |
-| **/clearchat** | Hapus semua chat history AI dari database. |
+# Start Bot
+npm start
+```
 
-### 🌦️ Weather
-| Command | Apa gunanya? |
-| :--- | :--- |
-| **/weather now** `[wilayah]` | Cek cuaca sekarang (semua user). |
-| **/weather set** `[channel]` `[wilayah]` `[jam]` | Set update cuaca harian (admin). |
-| **/weather stop** | Stop update cuaca harian (admin). |
+#### B. Menjalankan Web Dashboard
+```bash
+cd web
+npm install
 
-### 📊 Analytics
-| Command | Apa gunanya? |
-| :--- | :--- |
-| **/analytics setup** `[channel]` | Setup weekly report ke channel (admin). |
-| **/analytics stats** | Lihat statistik pribadi minggu ini. |
-| **/analytics leaderboard** | Top 10 member paling aktif. |
-| **/analytics report** | Generate weekly report sekarang (admin). |
-| **/analytics stop** | Hentikan weekly report (admin). |
-| **/analytics test seed** | Generate dummy data untuk testing (admin). |
-| **/analytics test clear** | Hapus semua data analytics (admin). |
-| **/analytics test preview** | Preview report tanpa post ke channel (admin). |
+# Jalankan mode development
+npm run dev
+```
+Akses web di: `http://localhost:3000`
 
 ---
 
-## 🚀 Cara Setup (Buat yang Berani)
+## 🐳 Docker Deployment (Recommended)
 
-1.  **Install Node.js** (Minimal v18+, recommended v22).
-2.  **Clone repo** ini:
-    ```bash
-    git clone https://github.com/irsyaddza/bot-ngawi-oke.git
-    cd bot-ngawi-oke
-    ```
-3.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
-4.  **Isi `.env`** (copy dari `.env.example` kalo ada, atau bikin manual):
-    ```env
-    # === Discord Bot ===
-    DISCORD_TOKEN=token_bot_dari_discord_developer_portal
-    CLIENT_ID=client_id_bot_untuk_register_commands
-    GUILD_ID=id_server_discord_untuk_deploy_commands
+Cara paling gampang buat deploy semuanya sekaligus tanpa ribet setup environment satu-satu.
 
-    # === AI Services ===
-    GEMINI_API_KEY=api_key_dari_google_ai_studio
-    OPENROUTER_API_KEY=api_key_dari_openrouter_untuk_deepseek
-
-    # === Voice/TTS ===
-    ELEVENLABS_API_KEY=api_key_dari_elevenlabs_untuk_tts_premium
-    ```
-    
-    **Cara dapetin:**
-    - `DISCORD_TOKEN` & `CLIENT_ID`: [Discord Developer Portal](https://discord.com/developers/applications) → Bot → Token & Application ID
-    - `GUILD_ID`: Enable Developer Mode di Discord → Klik kanan server → Copy Server ID
-    - `GEMINI_API_KEY`: [Google AI Studio](https://aistudio.google.com/apikey)
-    - `OPENROUTER_API_KEY`: [OpenRouter](https://openrouter.ai/keys)
-    - `ELEVENLABS_API_KEY`: [ElevenLabs](https://elevenlabs.io/)
-
-5.  **Daftarin Command**:
-    ```bash
-    npm run deploy
-    ```
-6.  **Gasskeun!**:
-    ```bash
-    npm start
-    ```
-
-> **Note**: Music system pake public Lavalink nodes. Kalo mau pake Lavalink server sendiri, edit config di `src/utils/lavalinkManager.js`.
-
----
-
-## 🐳 Docker Deployment (Optional)
-
-Mau deploy pake Docker? Gampang:
-
-1. **Pastiin Docker Desktop running**
-2. **Build dan jalanin:**
+1. **Pastikan Docker Desktop sudah running.**
+2. **Pastikan file `.env` sudah ada di root folder.**
+3. **Build dan Jalankan:**
    ```bash
    docker-compose up --build -d
    ```
-3. **Lihat logs:**
+4. **Cek Logs:**
    ```bash
    docker-compose logs -f
    ```
-4. **Stop:**
+5. **Stop Container:**
    ```bash
    docker-compose down
    ```
 
-> **Tip:** Build pertama agak lama (~5 menit) karena install ffmpeg + dependencies. Build selanjutnya lebih cepat karena Docker cache.
-
 ---
 
-## 📦 Tech Stack & Library
+## 📦 Tech Stack
 
+### 🤖 Bot Backend
 <div align="center">
   <img src="https://img.shields.io/badge/Discord.js-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord.js" />
-  <img src="https://img.shields.io/badge/Lavalink-FF5555?style=for-the-badge&logo=java&logoColor=white" alt="Lavalink" />
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
   <img src="https://img.shields.io/badge/Kazagumo-9B59B6?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Kazagumo" />
-  <img src="https://img.shields.io/badge/Shoukaku-3498DB?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Shoukaku" />
-  <img src="https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify" />
+  <img src="https://img.shields.io/badge/Lavalink-FF5555?style=for-the-badge&logo=java&logoColor=white" alt="Lavalink" />
   <img src="https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
   <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
-  <p><i>Plus msedge-tts, ElevenLabs SDK, OpenRouter, & FFmpeg Static</i></p>
+</div>
+
+### 🌐 Web Dashboard
+<div align="center">
+  <img src="https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Recharts-22b5bf?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Recharts" />
+  <img src="https://img.shields.io/badge/NextAuth-black?style=for-the-badge&logo=next.js&logoColor=white" alt="NextAuth" />
 </div>
 
 ---

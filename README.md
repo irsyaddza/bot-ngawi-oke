@@ -55,7 +55,7 @@ EMBEDEZ_API_KEY=
 
 # --- Web Auth ---
 # Konfigurasi untuk Dashboard Web
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:80
 NEXTAUTH_SECRET=
 ADMIN_ID=
 ```
@@ -84,7 +84,7 @@ npm install
 # Jalankan mode development
 npm run dev
 ```
-Akses web di: `http://localhost:3000`
+Akses web di: `http://localhost:80`
 
 ---
 

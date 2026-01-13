@@ -5,8 +5,14 @@ import { isAdminInDB } from "@/lib/settingsDB";
 
 const isDev = process.env.APP_ENV === 'development';
 
-const clientId = isDev ? process.env.DEV_CLIENT_ID : process.env.DISCORD_CLIENT_ID;
-const clientSecret = isDev ? process.env.DEV_DISCORD_CLIENT_SECRET : process.env.DISCORD_CLIENT_SECRET;
+const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || (isDev ? process.env.DEV_CLIENT_ID : undefined);
+const clientSecret = process.env.DISCORD_CLIENT_SECRET || (isDev ? process.env.DEV_DISCORD_CLIENT_SECRET : undefined);
+
+if (!clientId || !clientSecret) {
+    if (process.env.NODE_ENV === 'production') {
+       console.error("❌ MISSING OAUTH KETYS: DISCORD_CLIENT_ID or DISCORD_CLIENT_SECRET is missing.");
+    }
+}
 
 export const authOptions: NextAuthOptions = {
     providers: [

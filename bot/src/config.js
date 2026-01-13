@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const env = process.env.APP_ENV || 'production';
 
@@ -17,7 +17,13 @@ const config = {
 
 // Validation
 if (!config.token) {
-    console.warn(`[Config] ⚠️ Warning: Token is missing for environment: ${env}`);
+    console.warn(`[Config] ⚠️ Warning: Token is missing!`);
+    console.warn(`[Config] ℹ️ Environment detected: '${env}'`);
+    console.warn(`[Config] ℹ️ Looking for variable: '${env === 'development' ? 'DEV_DISCORD_TOKEN' : 'DISCORD_TOKEN'}'`);
+
+    // DEBUG: Print available keys (filtered)
+    const availableKeys = Object.keys(process.env).filter(key => !key.startsWith('npm_') && !key.startsWith('_'));
+    console.log('[Config] 🔍 Debug - Available ENV Keys in Container:', availableKeys.join(', '));
 }
 
 module.exports = config;

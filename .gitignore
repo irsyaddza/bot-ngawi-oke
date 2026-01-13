@@ -1,4 +1,8 @@
-
+# Database & Data
+data/
+*.db
+*.sqlite
+*.sqlite3
 # Logs
 logs/
 *.log

@@ -16,8 +16,15 @@ const VOICES = {
         id: 'id-ID-ArdiNeural',
         name: 'Ardi',
         emoji: '👨',
-        description: 'Pria (Edge)',
-        provider: 'msedge'
+        description: 'Pria Indonesia (Edge TTS)',
+        provider: 'edge-tts'
+    },
+    'gadis': {
+        id: 'id-ID-GadisNeural',
+        name: 'Gadis',
+        emoji: '👩',
+        description: 'Wanita Indonesia (Edge TTS)',
+        provider: 'edge-tts'
     },
     'brian': {
         id: 'pNInz6obpgDQGcFmaJgB',

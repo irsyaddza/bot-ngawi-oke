@@ -140,7 +140,7 @@ async function playWelcomeTTS(guildId, memberName, isBot = false) {
         let voice;
 
         if (isBot) {
-            message = "Rusdi from ngawi is here!";
+            message = "Rusdi dari Ngawi sudah datang!";
             voice = getVoiceInfo(guildId); // Use current guild voice setting
         } else {
             const welcomeMessages = [

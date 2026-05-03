@@ -182,11 +182,26 @@ module.exports = {
 
         } catch (error) {
             console.error('Play command error:', error);
+
+            let errorMsg = `❌ Error: ${error.message}`;
+
+            // Detect Lavalink RestError (node issue)
+            if (error.constructor?.name === 'RestError' || error.status) {
+                errorMsg = `❌ Lavalink node error (${error.status || 'unknown'}): ${error.error || error.message}\n\n` +
+                    `💡 The music server might be down. Try again in a moment.`;
+                
+                // Clean up broken player
+                try {
+                    const player = interaction.client.kazagumo?.players.get(interaction.guildId);
+                    if (player) player.destroy();
+                } catch (e) { /* ignore cleanup errors */ }
+            }
+
             await interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Red')
-                        .setDescription(`❌ Error: ${error.message}`)
+                        .setDescription(errorMsg)
                 ]
             });
         }

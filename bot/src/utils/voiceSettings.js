@@ -26,6 +26,20 @@ const VOICES = {
         description: 'Wanita Indonesia (Edge TTS)',
         provider: 'edge-tts'
     },
+    'guy': {
+        id: 'en-US-GuyNeural',
+        name: 'Guy',
+        emoji: '👱‍♂️',
+        description: 'Pria English (US) (Edge TTS)',
+        provider: 'edge-tts'
+    },
+    'aria': {
+        id: 'en-US-AriaNeural',
+        name: 'Aria',
+        emoji: '👱‍♀️',
+        description: 'Wanita English (US) (Edge TTS)',
+        provider: 'edge-tts'
+    },
     'brian': {
         id: 'pNInz6obpgDQGcFmaJgB',
         name: 'Brian',

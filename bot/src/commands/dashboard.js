@@ -12,7 +12,7 @@ module.exports = {
                 .addChoices(
                     { name: '🖥️ System', value: 'system' },
                     { name: '🤖 Gemini AI', value: 'gemini' },
-                    { name: '🟢 Deepseek (OpenRouter)', value: 'openrouter' },
+                    { name: '🟢 Grok (OpenRouter)', value: 'openrouter' },
                     { name: '🎙️ ElevenLabs', value: 'elevenlabs' },
                     { name: '🎬 EmbedEZ', value: 'embedez' }
                 )
@@ -199,7 +199,7 @@ async function showOpenRouterDashboard(interaction) {
         .addFields(
             { name: '🔌 Status', value: isAvailable ? '✅ Connected' : '❌ Error', inline: true },
             { name: '📊 API Key', value: '✅ Configured', inline: true },
-            { name: '🤖 Model', value: '`deepseek-r1t2-chimera`', inline: true },
+            { name: '🤖 Model', value: '`x-ai/grok-4.3`', inline: true },
             { name: '� Tier', value: creditBalance, inline: true },
             { name: '📈 Total Usage', value: usageInfo, inline: true },
             { name: '📊 Usage Stats', value: rateLimit, inline: true }

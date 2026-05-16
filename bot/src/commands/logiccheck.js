@@ -18,11 +18,11 @@ module.exports = {
                 model: 'gemini-flash-latest',
                 provider: 'Google AI'
             },
-            deepseek: {
-                name: 'DeepSeek',
-                color: '#00D4AA',
+            grok: {
+                name: 'Grok',
+                color: '#000000',
                 emoji: '🟢',
-                model: 'deepseek-r1t2-chimera',
+                model: 'x-ai/grok-4.3',
                 provider: 'OpenRouter'
             }
         };

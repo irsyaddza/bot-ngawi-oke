@@ -135,7 +135,7 @@ export default function SettingsPage() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-3">Active Logic Engine</label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {['gemini', 'deepseek'].map((logic) => (
+                                    {['gemini', 'grok'].map((logic) => (
                                         <button
                                             key={logic}
                                             onClick={() => updateSetting('ai_logic', logic)}

@@ -3,13 +3,13 @@
 
 const { getSetting, setSetting } = require('./settingsDB');
 
-const VALID_LOGICS = ['gemini', 'deepseek'];
+const VALID_LOGICS = ['gemini', 'grok'];
 const DEFAULT_LOGIC = 'gemini';
 
 /**
  * Get current logic for a guild
  * @param {string} guildId 
- * @returns {'gemini' | 'deepseek'}
+ * @returns {'gemini' | 'grok'}
  */
 function getLogic(guildId) {
     // Currently purely global, but function signature kept for compatibility
@@ -19,7 +19,7 @@ function getLogic(guildId) {
 /**
  * Set logic for a guild (persists to file)
  * @param {string} guildId 
- * @param {'gemini' | 'deepseek'} logic 
+ * @param {'gemini' | 'grok'} logic 
  */
 function setLogic(guildId, logic) {
     if (!VALID_LOGICS.includes(logic)) {

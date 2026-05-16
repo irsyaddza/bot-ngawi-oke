@@ -7,7 +7,7 @@ const path = require('path');
 function updateLogicActivity(client, logic) {
     const logicNames = {
         gemini: '🔵 Gemini AI',
-        deepseek: '🟢 DeepSeek AI'
+        grok: '🟢 Grok AI'
     };
     const activityName = logicNames[logic] || logicNames[DEFAULT_LOGIC];
     console.log(`Setting activity to: "${activityName}" for logic: ${logic}`);

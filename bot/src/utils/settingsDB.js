@@ -7,7 +7,7 @@ let db = null;
 // Default Settings
 const DEFAULTS = {
     'maintenance_mode': '0', // 0 = off, 1 = on
-    'ai_logic': 'gemini',    // gemini or deepseek
+    'ai_logic': 'gemini',    // gemini or grok
     'music_volume': '100'
 };
 
@@ -40,6 +40,9 @@ function initSettingsDB() {
             added_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     `);
+
+    // Migrate deepseek to grok
+    db.exec(`UPDATE global_settings SET value = 'grok' WHERE key = 'ai_logic' AND value = 'deepseek';`);
 
     return db;
 }

@@ -5,17 +5,30 @@ const { Connectors } = require('shoukaku');
 const { Kazagumo } = require('kazagumo');
 
 // Lavalink node configuration - Multiple nodes for failover
+// Source: https://lavalink-list.darrennathanael.com/SSL/Lavalink-SSL/
 const Nodes = [
     {
-        name: 'Lavalink-Ajie',
-        url: 'lava-v4.ajieblogs.eu.org:443',
-        auth: 'https://dsc.gg/ajidevserver',
+        name: 'Lavalink-Serenetia',
+        url: 'lavalinkv4.serenetia.com:443',
+        auth: 'https://seretia.link/discord',
         secure: true
     },
     {
-        name: 'Lavalink-Muzykant',
-        url: 'lavalink_v4.muzykant.xyz:443',
-        auth: 'https://discord.gg/v6sdrD9kPh',
+        name: 'Lavalink-Jirayu',
+        url: 'lavalink.jirayu.net:443',
+        auth: 'youshallnotpass',
+        secure: true
+    },
+    {
+        name: 'Lavalink-MilloHost',
+        url: 'lava-v4.millohost.my.id:443',
+        auth: 'https://discord.gg/mjS5J2K3ep',
+        secure: true
+    },
+    {
+        name: 'Lavalink-TriniumHost',
+        url: 'lavalink-v4.triniumhost.com:443',
+        auth: 'free',
         secure: true
     }
 ];

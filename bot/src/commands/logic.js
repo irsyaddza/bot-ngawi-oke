@@ -5,7 +5,7 @@ const { updateLogicActivity } = require('../events/ready');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('logic')
-        .setDescription('🧠 Ganti otak AI bot (Gemini/DeepSeek)')
+        .setDescription('🧠 Ganti otak AI bot (Gemini/Grok)')
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addStringOption(option =>
             option.setName('model')
@@ -13,7 +13,7 @@ module.exports = {
                 .setRequired(true)
                 .addChoices(
                     { name: '🔵 Gemini (Google)', value: 'gemini' },
-                    { name: '🟢 DeepSeek (OpenRouter)', value: 'deepseek' }
+                    { name: '🟢 Grok (OpenRouter)', value: 'grok' }
                 )
         ),
 
@@ -34,11 +34,11 @@ module.exports = {
                 emoji: '🔵',
                 desc: 'Google Gemini AI - Model default'
             },
-            deepseek: {
-                name: 'DeepSeek',
-                color: '#00D4AA',
+            grok: {
+                name: 'Grok',
+                color: '#000000',
                 emoji: '🟢',
-                desc: 'DeepSeek R1T2 Chimera via OpenRouter'
+                desc: 'Grok 4.3 via OpenRouter'
             }
         };
 

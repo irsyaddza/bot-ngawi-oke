@@ -16,8 +16,29 @@ const VOICES = {
         id: 'id-ID-ArdiNeural',
         name: 'Ardi',
         emoji: '👨',
-        description: 'Pria (Edge)',
-        provider: 'msedge'
+        description: 'Pria Indonesia (Edge TTS)',
+        provider: 'edge-tts'
+    },
+    'gadis': {
+        id: 'id-ID-GadisNeural',
+        name: 'Gadis',
+        emoji: '👩',
+        description: 'Wanita Indonesia (Edge TTS)',
+        provider: 'edge-tts'
+    },
+    'guy': {
+        id: 'en-US-GuyNeural',
+        name: 'Guy',
+        emoji: '👱‍♂️',
+        description: 'Pria English (US) (Edge TTS)',
+        provider: 'edge-tts'
+    },
+    'aria': {
+        id: 'en-US-AriaNeural',
+        name: 'Aria',
+        emoji: '👱‍♀️',
+        description: 'Wanita English (US) (Edge TTS)',
+        provider: 'edge-tts'
     },
     'brian': {
         id: 'pNInz6obpgDQGcFmaJgB',

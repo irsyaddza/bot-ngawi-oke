@@ -33,7 +33,7 @@ RUN mkdir -p /app/data
 COPY package*.json ./
 
 # Install npm dependencies (including native builds)
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .

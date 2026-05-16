@@ -7,7 +7,7 @@ let db: any = null;
 // Default Settings
 const DEFAULTS: Record<string, string> = {
     'maintenance_mode': '0', // 0 = off, 1 = on
-    'ai_logic': 'gemini',    // gemini or deepseek
+    'ai_logic': 'gemini',    // gemini or grok
     'music_volume': '100'
 };
 

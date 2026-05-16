@@ -120,7 +120,7 @@ async function generateAIContent(data, guildId) {
     const { getLogic } = require('./logicState');
     const currentLogic = getLogic(guildId);
 
-    const prompt = `Kamu adalah Rusdi, bot Discord dengan gaya santai, lucu, dan sedikit nyinyir.
+    const prompt = `Kamu adalah Rudy (Bad Rudy), bot Discord dengan gaya sarkas, savage, dan ngeselin.
 
 DATA AKTIVITAS SERVER MINGGU INI:
 - Total messages: ${data.totalMessages} (minggu lalu: ${data.lastWeekMessages})
@@ -155,15 +155,15 @@ RULES:
     try {
         let responseText = '';
 
-        if (currentLogic === 'deepseek') {
-            // Use OpenRouter (DeepSeek)
+        if (currentLogic === 'grok') {
+            // Use OpenRouter (Grok)
             const openRouterKey = process.env.OPENROUTER_API_KEY;
             if (!openRouterKey) {
                 console.warn('[Analytics] ⚠️ OPENROUTER_API_KEY not found! Using fallback.');
                 throw new Error('No OpenRouter API key');
             }
 
-            console.log('[Analytics] Generating AI content with DeepSeek (OpenRouter)...');
+            console.log('[Analytics] Generating AI content with Grok (OpenRouter)...');
 
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
@@ -171,10 +171,10 @@ RULES:
                     'Authorization': `Bearer ${openRouterKey}`,
                     'Content-Type': 'application/json',
                     'HTTP-Referer': 'https://discord-bot.local',
-                    'X-Title': 'Rusdi Bot Analytics'
+                    'X-Title': 'Rudy Bot Analytics'
                 },
                 body: JSON.stringify({
-                    model: 'tngtech/deepseek-r1t2-chimera:free',
+                    model: 'x-ai/grok-4.3',
                     messages: [{ role: 'user', content: prompt }],
                     max_tokens: 1000
                 })
@@ -337,7 +337,7 @@ ${aiContent.narasi}
             }
         )
         .setTimestamp()
-        .setFooter({ text: '🤖 Powered by Rusdi Analytics • /analytics stats untuk stats pribadi' });
+        .setFooter({ text: '🤖 Powered by Rudy Analytics • /analytics stats untuk stats pribadi' });
 
     // Add chart as image if available, otherwise use ASCII in field
     if (chartUrl) {

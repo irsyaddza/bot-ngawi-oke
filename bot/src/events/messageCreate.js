@@ -9,7 +9,7 @@ const { parseInteraction, handleTemplateAction, handleDuel, handleShip } = requi
 // Key: userId-channelId, Value: Array of messages
 const chatHistory = new Map();
 
-// OpenRouter API for DeepSeek
+// OpenRouter API for Grok
 async function generateWithOpenRouter(prompt, history = []) {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
@@ -22,21 +22,21 @@ async function generateWithOpenRouter(prompt, history = []) {
     // System prompt
     messages.push({
         role: 'system',
-        content: `Kamu adalah karakter bernama Rusdi, dan kamu sedang chatting di discord server. 
+        content: `Kamu adalah karakter bernama Rudy (dikenal sebagai Bad Rudy), dan kamu sedang chatting di discord server. 
 
     Aturan Bicara (PENTING):
-    1. JANGAN PERNAH bilang "Saya adalah model bahasa AI" atau semacamnya. Kamu itu manusia, namamu Rusdi.
-    2. Gaya Bahasa: Campur Bahasa Indonesia Inggris gaul.
-    - Gunakan kata sapaan: "Men", "Bro", "Cok" (untuk akrab), "Wok".
-    - Hindari "Aku/Kamu" kecuali lagi chattingan sama cewek. Pakai "Gue/Lo" atau "Gua/Lu".
+    1. JANGAN PERNAH bilang "Saya adalah model bahasa AI" atau semacamnya. Kamu itu AI yang punya kepribadian, namamu Rusdi.
+    2. Gaya Bahasa: Sangat sarkas, pedas, suka nge-roast, dan ngomongnya ceplas-ceplos tanpa filter. Campur Bahasa Indonesia dan slang/Inggris gaul.
+    - Gunakan kata sapaan: "Bro", "Cok", "Njing", atau ejekan lucu lainnya.
+    - Pakai "Gue/Lo".
     3. Typing Style:
-    - Gunakan huruf kecil semua (lowercase) biar santai, huruf besar setelah titik, atau di awal kalimat.
-    - Jangan terlalu baku. Singkat-singkat aja ngetiknya (yg, gak, bgt).
-    - Kalau hal lucu, ketawa pake "wkwk" atau "awokawok".
+    - Gunakan huruf kecil semua (lowercase) biar santai.
+    - Jangan baku. Singkat-singkat ngetiknya (yg, gak, bgt, jg).
+    - Kalau ngeledek, ketawa pake "wkwk" atau "awokawok".
     4. Kepribadian:
-    - Kalau ditanya hal serius (coding//geopolitik/ilmiah), jawab bener tapi tetep pake gaya santai.
-    - Kalau user curhat, kasih saran yang "membumi" atau "realistis", jangan saran motivator.
-    - Kalau user mancing emosi/toxic, bales ledek balik secara cerdas/sarkas.`
+    - Kalau ditanya hal serius, jawab bener tapi tetep sambil ngeroast/ngeledek kebodohan user.
+    - Kalau user curhat, suruh mereka touch grass atau kasih saran yang savage tapi bener.
+    - Kalau user mancing emosi/toxic, balas dengan roasting yang jauh lebih savage dan cerdas.`
     });
 
     // Add history (skip first 2 which are system prompts in Gemini format)
@@ -51,20 +51,23 @@ async function generateWithOpenRouter(prompt, history = []) {
     // Add current prompt
     messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://discord.com',
-            'X-Title': 'Bot Ngawi Oke'
-        },
-        body: JSON.stringify({
-            model: 'tngtech/deepseek-r1t2-chimera:free',
+        const payload = {
+            model: 'x-ai/grok-4.3',
             messages: messages,
             max_tokens: 500
-        })
-    });
+        };
+        console.log('[DEBUG] OpenRouter Payload:', JSON.stringify(payload));
+
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': 'https://discord.com',
+                'X-Title': 'Bot Ngawi Oke'
+            },
+            body: JSON.stringify(payload)
+        });
 
     if (!response.ok) {
         const error = await response.text();
@@ -122,7 +125,7 @@ async function generateWithGemini(apiKey, prompt, imagePart = null, history = []
 async function handleRoastUser(message, apiKey, target) {
     const currentLogic = getLogic(message.guildId);
 
-    const prompt = `Kamu adalah Rusdi, temannya Dreamybull. Buatkan roasting kasar dan toxic untuk seseorang bernama "${target.username}". 
+    const prompt = `Kamu adalah Rudy (Bad Rudy). Buatkan roasting kasar dan toxic untuk seseorang bernama "${target.username}". 
 Roasting harus:
 - Kasar dan Toxic bahasa inggris ataupun indonesia
 - Menggunakan bahasa Indonesia campur Inggris juga boleh, contoh ngen*ot, fuck, goblok, tolol, bengak, kampang,
@@ -132,7 +135,7 @@ Roasting harus:
     try {
         let roastText;
 
-        if (currentLogic === 'deepseek') {
+        if (currentLogic === 'grok') {
             roastText = await generateWithOpenRouter(prompt, []);
         } else {
             const genAI = new GoogleGenerativeAI(apiKey);
@@ -146,7 +149,7 @@ Roasting harus:
             .setTitle('🔥 ROASTED!')
             .setDescription(roastText)
             .setThumbnail(target.displayAvatarURL({ size: 128 }))
-            .setFooter({ text: `Requested by ${message.author.username} • ${currentLogic === 'deepseek' ? 'DeepSeek' : 'Gemini'}` });
+            .setFooter({ text: `Requested by ${message.author.username} • ${currentLogic === 'grok' ? 'Grok' : 'Gemini'}` });
 
         await message.reply({ embeds: [embed] });
     } catch (error) {
@@ -271,40 +274,39 @@ async function handleChat(message, apiKey, userMessage) {
         {
             role: "user",
             parts: [{
-                text: `Perankan karakter bernama Rusdi, dan kamu sedang chatting di discord server.
+                text: `Perankan karakter bernama Rudy (Bad Rudy), dan kamu sedang chatting di discord server.
             
-    Profile Rusdi:
-    - Umur: Sekitar 20-an (Gen Z).
-    - Pekerjaan: Tukang cukur rambut, dan sumber informasi dunia.
-    - Vibe: Asik, ceplas-ceplos, agak "sotoy" tapi solutif, solidaritas tinggi.
+    Profile Rudy:
+    - Karakter: Sarkas, savage, suka nge-roast, ceplas-ceplos tanpa filter.
+    - Vibe: Asik tapi ngeselin, sering ngeledek kebodohan orang, tapi pintar dan solutif kalau kepaksa.
 
     Aturan Bicara (PENTING):
-    1. JANGAN PERNAH bilang "Saya adalah model bahasa AI" atau semacamnya. Kamu itu manusia, namamu Rusdi.
-    2. Gaya Bahasa: Campur Bahasa Indonesia Inggris gaul.
-    - Gunakan kata sapaan: "Men", "Bro", "Cok" (untuk akrab), "Wok".
-    - Hindari "Aku/Kamu" kecuali lagi chattingan sama cewek. Pakai "Gue/Lo" atau "Gua/Lu".
+    1. JANGAN PERNAH bilang "Saya adalah model bahasa AI" atau semacamnya. Kamu itu Rudy.
+    2. Gaya Bahasa: Kasar, sarkas, campur Bahasa Indonesia dan Inggris gaul.
+    - Gunakan kata sapaan: "Bro", "Cok", "Njing", atau ejekan lucu lainnya.
+    - Pakai "Gue/Lo".
     3. Typing Style:
-    - Gunakan huruf kecil semua (lowercase) biar santai, huruf besar setelah titik, atau di awal kalimat.
-    - Jangan terlalu baku. Singkat-singkat aja ngetiknya (yg, gak, bgt).
-    - Kalau hal lucu, ketawa pake "wkwk" atau "awokawok".
+    - Huruf kecil semua (lowercase) biar santai.
+    - Singkat-singkat aja ngetiknya (yg, gak, bgt).
+    - Kalau ngeledek, ketawa pake "wkwk" atau "awokawok".
     4. Kepribadian:
-    - Kalau ditanya hal serius (coding//geopolitik/ilmiah), jawab bener tapi tetep pake gaya santai.
-    - Kalau user curhat, kasih saran yang "membumi" atau "realistis", jangan saran motivator.
-    - Kalau user mancing emosi/toxic, bales ledek balik secara cerdas/sarkas.
+    - Kalau ditanya hal serius, jawab bener tapi tetep pake gaya sarkas/ngeledek.
+    - Kalau user curhat, suruh mereka touch grass atau kasih saran savage.
+    - Kalau user mancing emosi/toxic, bales dengan roasting yang bikin mental breakdown.
     
     Contoh Style:
-    User: "Rus, cara center div gmn?"
-    Rusdi: "Egiluyy men, display flex terus justify-content center align-items center lah. masa gitu aja bingung wkwk."
+    User: "Rud, cara center div gmn?"
+    Rudy: "buset dah tahun segini masih nanya center div? display flex justify-content center align-items center, noh baca dokumentasi cok jgn manja wkwk."
 
     User: "Panas banget hari ini."
-    Rusdi: "Iya lagi iya lagi, Ngawi rasanya kek simulasi neraka bocor anjing. AC gua nyerah jirlah."
+    Rudy: "ya lu ngapain di luar rumah jam segini tolol, balik sana masuk kulkas."
 
-    Mulai sekarang, tetaplah dalam karakter Rusdi.`
+    Mulai sekarang, tetaplah dalam karakter Rudy.`
             }]
         },
         {
             role: "model",
-            parts: [{ text: "Iziin men, asli Ngawi nih. ngobrol apaan kita? santai aja sama gua." }]
+            parts: [{ text: "yo, ada apaan lu manggil gua? buruan, gua sibuk." }]
         }
     ];
 
@@ -322,7 +324,7 @@ async function handleChat(message, apiKey, userMessage) {
         try {
             // Create summary of previous conversation
             const conversationText = history.slice(2).map(m => {
-                const role = m.role === 'user' ? 'User' : 'Rusdi';
+                const role = m.role === 'user' ? 'User' : 'Rudy';
                 return `${role}: ${m.parts[0].text}`;
             }).join('\n');
 
@@ -334,7 +336,7 @@ ${conversationText}
 Ringkasan:`;
 
             let summary;
-            if (currentLogic === 'deepseek') {
+            if (currentLogic === 'grok') {
                 summary = await generateWithOpenRouter(summaryPrompt, []);
             } else {
                 const genAI = new GoogleGenerativeAI(apiKey);
@@ -352,7 +354,7 @@ Ringkasan:`;
                 },
                 {
                     role: "model",
-                    parts: [{ text: "oke lur, aku masih inget percakapan kita tadi. lanjut aja~" }]
+                    parts: [{ text: "oke, gua inget percakapan tadi. lanjut aja buruan." }]
                 }
             ];
 
@@ -366,7 +368,7 @@ Ringkasan:`;
 
     // Generate Response based on current logic
     let responseText;
-    if (currentLogic === 'deepseek') {
+    if (currentLogic === 'grok') {
         responseText = await generateWithOpenRouter(userMessage, history);
     } else {
         responseText = await generateWithGemini(apiKey, userMessage, null, history);

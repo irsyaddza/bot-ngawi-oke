@@ -26,8 +26,9 @@ RUN apt-get update && apt-get install -y \
 # Create app directory
 WORKDIR /app
 
-# Create data directory for SQLite databases
-RUN mkdir -p /app/data
+# Create data and assets directories with open permissions (for volume mounts)
+RUN mkdir -p /app/data /app/bot/src/assets && \
+    chmod 777 /app/data /app/bot/src/assets
 
 # Copy package files
 COPY package*.json ./
@@ -38,5 +39,8 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Copy entrypoint script
+COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
+
 # Start bot
-CMD ["npm", "start"]
+ENTRYPOINT ["/app/entrypoint.sh"]

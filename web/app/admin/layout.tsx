@@ -11,7 +11,8 @@ import {
     LogOut,
     Menu,
     X,
-    Bot
+    Bot,
+    Volume2
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const MENU_ITEMS = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
+    { name: 'Soundboard', href: '/admin/sounds', icon: Volume2 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
     { name: 'Database', href: '/admin/database', icon: Database },
 ];

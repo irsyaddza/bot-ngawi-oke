@@ -5,6 +5,7 @@ const { getBotWelcome, getVoiceInfo, VOICES } = require('../utils/voiceSettings'
 const { isAllowed, getLockInfo } = require('../utils/voiceLock');
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const { sendAuditLog } = require('../utils/auditLogUtils');
+const { playBellIfEnabled } = require('../utils/audioUtils');
 
 // TTS generation logic moved to shared handler
 
@@ -136,6 +137,9 @@ async function playWelcomeTTS(guildId, memberName, isBot = false) {
     if (!connection) return;
 
     try {
+        // Play warning bell MP3 first (if enabled)
+        await playBellIfEnabled(connection, guildId);
+
         let message;
         let voice;
 

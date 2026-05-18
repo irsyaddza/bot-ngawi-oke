@@ -1,6 +1,7 @@
 {
   "1050450116881944687": {
     "botWelcome": true,
-    "voice": "ardi"
+    "voice": "ardi",
+    "voiceChatEnabled": false
   }
 }

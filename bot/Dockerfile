@@ -26,9 +26,9 @@ RUN apt-get update && apt-get install -y \
 # Create app directory
 WORKDIR /app
 
-# Create data and assets directories with open permissions (for volume mounts)
-RUN mkdir -p /app/data /app/bot/src/assets && \
-    chmod 777 /app/data /app/bot/src/assets
+# Create data directory with open permissions (for volume mount)
+RUN mkdir -p /app/data && \
+    chmod 777 /app/data
 
 # Copy package files
 COPY package*.json ./

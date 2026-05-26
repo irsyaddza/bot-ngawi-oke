@@ -58,8 +58,11 @@ async function handleList(interaction) {
                     value: `Plays: ${sound.playCount || 0} | ${sound.description || 'No description'}`,
                     inline: false
                 }))
-            )
-            .setFooter({ text: sounds.length > 25 ? `Showing 25 of ${sounds.length}` : undefined });
+            );
+
+        if (sounds.length > 25) {
+            embed.setFooter({ text: `Showing 25 of ${sounds.length}` });
+        }
 
         return interaction.reply({ embeds: [embed], ephemeral: true });
 

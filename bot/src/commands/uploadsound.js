@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('disc
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { addSound, getSounds } = require('../utils/soundMetadata');
+const { addSound, getSounds, getSoundsDir } = require('../utils/soundMetadata');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -66,7 +66,12 @@ module.exports = {
             // Generate nama file unik
             const ext = attachment.name.split('.').pop().toLowerCase();
             const fileName = `${soundName.replace(/\s+/g, '_')}_${Date.now()}.${ext}`;
-            const filePath = path.join(__dirname, '../assets', fileName);
+            // Save to persistent data/sounds/ directory (volume-mounted)
+            const soundsDirectory = getSoundsDir();
+            if (!fs.existsSync(soundsDirectory)) {
+                fs.mkdirSync(soundsDirectory, { recursive: true });
+            }
+            const filePath = path.join(soundsDirectory, fileName);
 
             // Download file dari Discord CDN
             await downloadFile(attachment.url, filePath);
@@ -115,12 +120,6 @@ module.exports = {
 
         } catch (error) {
             console.error('Upload Error:', error);
-            
-            // Hapus file jika ada yang tersimpan tapi terjadi error
-            const filePath = path.join(__dirname, '../assets', fileName);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
 
             interaction.editReply({
                 embeds: [

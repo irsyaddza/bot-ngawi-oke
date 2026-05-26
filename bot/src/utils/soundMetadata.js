@@ -1,37 +1,48 @@
 const fs = require('fs');
 const path = require('path');
 
-// Path to store sound metadata
-const dataDir = path.join(__dirname, '../../data');
+// Path to store sound metadata — uses DATABASE_PATH env var (volume-mounted /app/data)
+const dataDir = process.env.DATABASE_PATH || path.join(__dirname, '../../data');
 const metadataFile = path.join(dataDir, 'soundMetadata.json');
 
-// Ensure data directory exists with proper permissions
+// Persistent directory for uploaded sound files (inside the data volume)
+const soundsDir = path.join(dataDir, 'sounds');
+
+/**
+ * Get the directory path where uploaded sound files are stored.
+ * This is inside the data volume so files persist across Docker restarts.
+ * @returns {string} Absolute path to sounds directory
+ */
+function getSoundsDir() {
+    return soundsDir;
+}
+
+// Ensure data and sounds directories exist with proper permissions
 function ensureDirectoryExists() {
     try {
-        if (!fs.existsSync(dataDir)) {
-            console.log(`[SoundMetadata] Creating data directory: ${dataDir}`);
-            fs.mkdirSync(dataDir, { recursive: true, mode: 0o777 });
-        }
+        for (const dir of [dataDir, soundsDir]) {
+            if (!fs.existsSync(dir)) {
+                console.log(`[SoundMetadata] Creating directory: ${dir}`);
+                fs.mkdirSync(dir, { recursive: true, mode: 0o777 });
+            }
 
-        // Ensure write permissions
-        try {
-            fs.accessSync(dataDir, fs.constants.W_OK);
-        } catch {
-            console.warn(`[SoundMetadata] Directory not writable, attempting to fix: ${dataDir}`);
+            // Ensure write permissions
             try {
-                fs.chmodSync(dataDir, 0o777);
-                console.log('[SoundMetadata] Fixed directory permissions');
-            } catch (chmodError) {
-                console.warn('[SoundMetadata] Could not fix permissions:', chmodError);
+                fs.accessSync(dir, fs.constants.W_OK);
+            } catch {
+                console.warn(`[SoundMetadata] Directory not writable, attempting to fix: ${dir}`);
+                try {
+                    fs.chmodSync(dir, 0o777);
+                    console.log(`[SoundMetadata] Fixed directory permissions for: ${dir}`);
+                } catch (chmodError) {
+                    console.warn('[SoundMetadata] Could not fix permissions:', chmodError);
+                }
             }
         }
     } catch (error) {
         console.error('[SoundMetadata] Failed to ensure directory:', error);
     }
 }
-
-// Initialize on module load
-ensureDirectoryExists();
 
 // Load metadata from file
 function loadMetadata() {
@@ -78,6 +89,47 @@ function saveMetadata(metadata) {
         console.error('[SoundMetadata] Error saving metadata:', error);
     }
 }
+
+/**
+ * Scan soundMetadata.json and remove any sound entries whose audio files 
+ * do not exist in either data/sounds/ or src/assets/.
+ */
+function cleanupMissingSounds() {
+    try {
+        const metadata = loadMetadata();
+        let changed = false;
+
+        for (const guildId in metadata) {
+            if (metadata[guildId] && metadata[guildId].sounds) {
+                const initialLength = metadata[guildId].sounds.length;
+                metadata[guildId].sounds = metadata[guildId].sounds.filter(sound => {
+                    const fileInSounds = path.join(soundsDir, sound.filename);
+                    const fileInAssets = path.join(__dirname, '../assets', sound.filename);
+                    const exists = fs.existsSync(fileInSounds) || fs.existsSync(fileInAssets);
+                    if (!exists) {
+                        console.log(`[SoundMetadata] Removing missing sound from metadata: ${sound.name} (${sound.filename})`);
+                    }
+                    return exists;
+                });
+
+                if (metadata[guildId].sounds.length !== initialLength) {
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            saveMetadata(metadata);
+            console.log('[SoundMetadata] Cleaned up missing sounds from metadata file');
+        }
+    } catch (error) {
+        console.error('[SoundMetadata] Error cleaning up missing sounds:', error);
+    }
+}
+
+// Initialize and auto-cleanup on module load
+ensureDirectoryExists();
+cleanupMissingSounds();
 
 /**
  * Add a new sound to metadata
@@ -233,5 +285,6 @@ module.exports = {
     renameSound,
     updateDescription,
     loadMetadata,
-    saveMetadata
+    saveMetadata,
+    getSoundsDir
 };

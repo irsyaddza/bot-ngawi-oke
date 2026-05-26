@@ -2,9 +2,32 @@ const { createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@
 const fs = require('fs');
 const path = require('path');
 const { isBellEnabled, getBellFileName } = require('./bellSettings');
+const { getSoundsDir } = require('./soundMetadata');
 
 /**
- * Play an MP3 file from the assets folder
+ * Resolve a sound file from available directories.
+ * Priority: 1) data/sounds/ (uploaded files), 2) src/assets/ (built-in files)
+ * @param {string} fileName - File name (without directory path)
+ * @returns {string|null} Full path to the file, or null if not found
+ */
+function resolveAudioFile(fileName) {
+    // Check data/sounds/ first (uploaded files, persistent)
+    const soundsPath = path.join(getSoundsDir(), fileName);
+    if (fs.existsSync(soundsPath)) {
+        return soundsPath;
+    }
+
+    // Fallback to src/assets/ (built-in sounds like bell1.mp3, tutturu.mp3)
+    const assetsPath = path.join(__dirname, '../assets', fileName);
+    if (fs.existsSync(assetsPath)) {
+        return assetsPath;
+    }
+
+    return null;
+}
+
+/**
+ * Play an MP3 file — automatically resolves from data/sounds/ or src/assets/
  * @param {import('@discordjs/voice').VoiceConnection} connection 
  * @param {string} fileName - Nama file MP3 (tanpa path)
  * @returns {Promise<void>}
@@ -16,22 +39,25 @@ async function playMP3(connection, fileName) {
     }
 
     try {
-        const filePath = path.join(__dirname, '../assets', fileName);
-        console.log(`[AudioUtils] Attempting to play: ${filePath}`);
+        const filePath = resolveAudioFile(fileName);
+        console.log(`[AudioUtils] Attempting to play: ${fileName}`);
 
         // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            console.error(`[AudioUtils] File not found: ${filePath}`);
+        if (!filePath) {
+            console.error(`[AudioUtils] File not found in any location: ${fileName}`);
             
             // List available files for debugging
+            const soundsDir = getSoundsDir();
             const assetsDir = path.join(__dirname, '../assets');
-            const files = fs.readdirSync(assetsDir);
-            console.log(`[AudioUtils] Available files: ${files.join(', ')}`);
+            const soundFiles = fs.existsSync(soundsDir) ? fs.readdirSync(soundsDir) : [];
+            const assetFiles = fs.existsSync(assetsDir) ? fs.readdirSync(assetsDir) : [];
+            console.log(`[AudioUtils] Files in data/sounds/: ${soundFiles.join(', ') || '(empty)'}`);
+            console.log(`[AudioUtils] Files in src/assets/: ${assetFiles.join(', ')}`);
             return;
         }
 
         const stats = fs.statSync(filePath);
-        console.log(`[AudioUtils] File found: ${fileName} (${stats.size} bytes)`);
+        console.log(`[AudioUtils] File found: ${filePath} (${stats.size} bytes)`);
 
         const player = createAudioPlayer();
         const resource = createAudioResource(filePath);
